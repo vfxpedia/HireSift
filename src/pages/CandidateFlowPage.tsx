@@ -77,13 +77,18 @@ export default function CandidateFlowPage() {
     );
   }
 
-  // If this candidate already finished a submission, don't silently
-  // boot them back into step 7 — give the visitor a clear exit.
-  if (
+  // If this candidate already finished a submission *in a previous
+  // visit*, give the visitor a clear exit instead of re-running the
+  // flow. But the active session — the one that just clicked Submit
+  // and now needs to see the success screen — keeps running. We use
+  // submission.step === 7 to detect "the in-flight session reached
+  // Complete" and let it through.
+  const submissionSnapshot = getSubmission(candidate.id);
+  const finishedStatus =
     candidate.submissionStatus === "submitted" ||
     candidate.submissionStatus === "reviewed" ||
-    candidate.submissionStatus === "report-ready"
-  ) {
+    candidate.submissionStatus === "report-ready";
+  if (finishedStatus && submissionSnapshot.step < 7) {
     return <AlreadySubmittedScreen candidateName={candidate.name} candidateId={candidate.id} />;
   }
 
