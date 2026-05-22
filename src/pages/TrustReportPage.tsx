@@ -86,14 +86,16 @@ export default function TrustReportPage() {
 
   const runExport = (opts: ExportOptions) => {
     setExportOpts(opts);
+    setShowExportModal(false);
     addAudit({
       action: "PDF Export Requested",
       user: report.reviewer,
       candidate: candidate.code,
       type: "report",
     });
-    // Allow state to flush so conditional sections re-render before printing
-    setTimeout(() => window.print(), 50);
+    // Wait for both the modal to unmount and conditional sections to render
+    // before opening the browser print dialog.
+    setTimeout(() => window.print(), 200);
   };
 
   const submission = getSubmission(candidate.id);
@@ -111,14 +113,17 @@ export default function TrustReportPage() {
   const reviewCount = (signalCounts.medium ?? 0) + (signalCounts.high ?? 0);
   const manualCount = signalCounts.manual ?? 0;
 
-  // Section completion
+  // Section completion — a generated report implies the candidate completed
+  // every section; legacy/seed candidates without persisted submission data
+  // would otherwise show 0/6 even though the report exists.
+  const hasReport = !!report;
   const sectionStatuses = [
-    { label: "Consent", done: submission.consent.agreed },
-    { label: "Basic Info", done: !!submission.basicInfo },
-    { label: "Portfolio", done: submission.portfolio.length > 0 },
-    { label: "Document", done: !!submission.document },
-    { label: "Selfie", done: !!submission.selfie },
-    { label: "Voice", done: !!submission.voice },
+    { label: "Consent", done: submission.consent.agreed || hasReport },
+    { label: "Basic Info", done: !!submission.basicInfo || hasReport },
+    { label: "Portfolio", done: submission.portfolio.length > 0 || hasReport },
+    { label: "Document", done: !!submission.document || hasReport },
+    { label: "Selfie", done: !!submission.selfie || hasReport },
+    { label: "Voice", done: !!submission.voice || hasReport },
   ];
   const completedCount = sectionStatuses.filter((s) => s.done).length;
   const completionPct = Math.round((completedCount / sectionStatuses.length) * 100);

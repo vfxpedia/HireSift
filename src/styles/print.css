@@ -14,7 +14,17 @@
 
   aside,
   nav,
-  .print\:hidden {
+  .print\:hidden,
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-radix-popper-content-wrapper],
+  [data-sonner-toaster],
+  [data-sonner-toast] {
+    display: none !important;
+  }
+
+  /* Radix Dialog overlay sits as a sibling fixed-inset div without a role. */
+  body > div.fixed.inset-0 {
     display: none !important;
   }
 
