@@ -281,6 +281,7 @@
     "selfieVideo": "Selfie Video",
     "voiceSample": "Voice Sample",
     "mediaEmpty": "Not yet provided",
+    "mediaPlaceholder": "Demo placeholder ({{seconds}}s)",
     "quickActions": "Quick Actions",
     "openReviewerReview": "Open Reviewer Review",
     "sendCopyLink": "Send / Copy Verification Link",
@@ -468,6 +469,28 @@
     "submitVerification": "Submit Verification →",
     "missingLink": "This verification link is invalid or expired. Please contact the hiring team for a new link.",
     "backToHome": "Back to home",
+    "intro": {
+      "title": "Try the candidate verification flow",
+      "lead": "Walk through the same eight-step submission a real candidate sees: consent, basic info, portfolio, masked document, selfie and voice sample, review, submit.",
+      "noteTitle": "This is a demo session",
+      "noteBody": "We create a one-off demo candidate just for you. Anything you submit stays in your browser (localStorage) — nothing is sent to a server, and no data is shared.",
+      "feature1": "Real upload + microphone/camera capture (you can also skip media on this device)",
+      "feature2": "Localized in English and Korean — toggle in the top-right",
+      "feature3": "Submission appears in the admin pipeline as a brand-new candidate",
+      "start": "Start demo verification",
+      "alreadyHave": "Already have a verification link? Paste it in your browser's address bar."
+    },
+    "alreadySubmitted": {
+      "title": "Submission already completed",
+      "body": "{{name}} has finished this verification. Open the reviewer console to look at the signals, or start a fresh demo session.",
+      "openReviewer": "Open reviewer console",
+      "startNew": "Start a new demo session"
+    },
+    "mediaSkip": {
+      "label": "Skip for this demo",
+      "skipped": "Demo placeholder recorded ({{seconds}}s)",
+      "notice": "Camera/microphone access wasn't granted, so this step uses a demo placeholder."
+    },
     "step": {
       "consent": "Consent",
       "basicInfo": "Basic Info",

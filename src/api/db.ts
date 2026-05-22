@@ -23,17 +23,40 @@ const KEYS = {
   audit: "audit",
   org: "org",
   seeded: "seeded",
+  reseedReviews: "reseed:reviews:v2",
+  reseedReports: "reseed:reports:v2",
 } as const;
 
 function ensureSeeded() {
-  if (load(KEYS.seeded, false)) return;
-  save(KEYS.candidates, SEED_CANDIDATES);
-  save(KEYS.submissions, [] as CandidateSubmission[]);
-  save(KEYS.reviews, SEED_REVIEWS);
-  save(KEYS.reports, SEED_REPORTS);
-  save(KEYS.audit, SEED_AUDIT);
-  save(KEYS.org, SEED_ORG);
-  save(KEYS.seeded, true);
+  if (!load(KEYS.seeded, false)) {
+    save(KEYS.candidates, SEED_CANDIDATES);
+    save(KEYS.submissions, [] as CandidateSubmission[]);
+    save(KEYS.reviews, SEED_REVIEWS);
+    save(KEYS.reports, SEED_REPORTS);
+    save(KEYS.audit, SEED_AUDIT);
+    save(KEYS.org, SEED_ORG);
+    save(KEYS.seeded, true);
+  }
+
+  // Targeted reseed for seed-candidate reviews/reports so that demos
+  // recover the curated content even after a user previously overwrote
+  // (e.g. saved an empty note). User-created rows for non-seed
+  // candidates are preserved.
+  if (!load(KEYS.reseedReviews, false)) {
+    const seedIds = new Set(SEED_REVIEWS.map((r) => r.candidateId));
+    const existing = load<ReviewerData[]>(KEYS.reviews, []);
+    const preserved = existing.filter((r) => !seedIds.has(r.candidateId));
+    save(KEYS.reviews, [...SEED_REVIEWS, ...preserved]);
+    save(KEYS.reseedReviews, true);
+  }
+
+  if (!load(KEYS.reseedReports, false)) {
+    const seedIds = new Set(SEED_REPORTS.map((r) => r.candidateId));
+    const existing = load<TrustReport[]>(KEYS.reports, []);
+    const preserved = existing.filter((r) => !seedIds.has(r.candidateId));
+    save(KEYS.reports, [...SEED_REPORTS, ...preserved]);
+    save(KEYS.reseedReports, true);
+  }
 }
 
 ensureSeeded();

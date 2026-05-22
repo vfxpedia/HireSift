@@ -26,7 +26,7 @@ import { Card, GuardrailNotice } from "../components/primitives/Card";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
 import { Field, TextInput, inputClass } from "../components/primitives/Field";
 import { useMediaRecorder, type RecorderResult } from "../hooks/useMediaRecorder";
-import { listCandidates, getCandidate, setSubmissionStatus } from "../api/candidates";
+import { listCandidates, getCandidate, setSubmissionStatus, createCandidate } from "../api/candidates";
 import {
   getSubmission,
   recordConsent,
@@ -56,25 +56,16 @@ export default function CandidateFlowPage() {
   const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId?: string }>();
 
-  const targetId = useMemo(() => {
-    if (candidateId) return candidateId;
-    const list = listCandidates();
-    return (
-      list.find((c) => c.submissionStatus === "pending")?.id ??
-      list.find((c) => c.submissionStatus === "in-progress")?.id ??
-      list[0]?.id
-    );
-  }, [candidateId]);
+  // Visiting /verify with no id is a demo entry point — show an intro
+  // page that explicitly creates a fresh candidate on user gesture
+  // rather than silently piggy-backing on whoever the next "pending"
+  // seed row happens to be.
+  if (!candidateId) {
+    return <DemoIntroScreen />;
+  }
 
-  const candidate = targetId ? getCandidate(targetId) : undefined;
-
-  const [step, setStep] = useState<number>(() => (targetId ? getSubmission(targetId).step : 0));
-
-  useEffect(() => {
-    if (targetId) setStepApi(targetId, step);
-  }, [targetId, step]);
-
-  if (!candidate || !targetId) {
+  const candidate = getCandidate(candidateId);
+  if (!candidate) {
     return (
       <div className="min-h-screen bg-[#F7F8FA] flex items-center justify-center p-6">
         <Card className="p-8 max-w-sm text-center">
@@ -85,6 +76,151 @@ export default function CandidateFlowPage() {
       </div>
     );
   }
+
+  // If this candidate already finished a submission, don't silently
+  // boot them back into step 7 — give the visitor a clear exit.
+  if (
+    candidate.submissionStatus === "submitted" ||
+    candidate.submissionStatus === "reviewed" ||
+    candidate.submissionStatus === "report-ready"
+  ) {
+    return <AlreadySubmittedScreen candidateName={candidate.name} candidateId={candidate.id} />;
+  }
+
+  return <CandidateFlowSession candidateId={candidateId} />;
+}
+
+function DemoIntroScreen() {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const startDemo = () => {
+    const ts = new Date();
+    const stamp = `${ts.getFullYear()}${(ts.getMonth() + 1).toString().padStart(2, "0")}${ts
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${ts.getHours().toString().padStart(2, "0")}${ts
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
+    const candidate = createCandidate({
+      name: `Demo Candidate ${stamp}`,
+      email: "demo@hiresift.app",
+      role: "Demo Verification",
+    });
+    navigate(`/verify/${candidate.id}`, { replace: true });
+  };
+
+  const features = [
+    t("candidateFlow.intro.feature1"),
+    t("candidateFlow.intro.feature2"),
+    t("candidateFlow.intro.feature3"),
+  ];
+
+  return (
+    <div
+      className="min-h-screen bg-[#F7F8FA] flex flex-col"
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <header className="bg-white border-b border-[#E5E7EB] px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-[#172033] rounded-lg flex items-center justify-center">
+              <Shield className="w-3.5 h-3.5 text-white" />
+            </div>
+            <p className="font-semibold text-sm text-[#172033]">{t("candidateFlow.title")}</p>
+          </div>
+          <LanguageToggle />
+        </div>
+      </header>
+      <div className="flex-1 flex items-start justify-center px-6 py-12">
+        <Card className="p-8 max-w-2xl w-full">
+          <h1 className="text-2xl font-bold text-[#172033] mb-2">{t("candidateFlow.intro.title")}</h1>
+          <p className="text-sm text-[#6B7280] leading-relaxed mb-6">{t("candidateFlow.intro.lead")}</p>
+          <div className="rounded-xl border border-[#C6923A]/20 bg-[#C6923A]/5 p-4 mb-6">
+            <div className="flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[#C6923A] mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-[#8A6422] mb-1">
+                  {t("candidateFlow.intro.noteTitle")}
+                </p>
+                <p className="text-xs text-[#8A6422] leading-relaxed">
+                  {t("candidateFlow.intro.noteBody")}
+                </p>
+              </div>
+            </div>
+          </div>
+          <ul className="space-y-2.5 mb-7">
+            {features.map((f) => (
+              <li key={f} className="flex items-start gap-2.5 text-sm text-[#374151]">
+                <CheckCircle className="w-4 h-4 text-[#2F7D7E] mt-0.5 shrink-0" />
+                <span className="leading-relaxed">{f}</span>
+              </li>
+            ))}
+          </ul>
+          <PrimaryBtn onClick={startDemo} className="w-full justify-center text-sm">
+            {t("candidateFlow.intro.start")}
+          </PrimaryBtn>
+          <p className="text-xs text-[#9CA3AF] text-center mt-4">
+            {t("candidateFlow.intro.alreadyHave")}
+          </p>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function AlreadySubmittedScreen({
+  candidateName,
+  candidateId,
+}: {
+  candidateName: string;
+  candidateId: string;
+}) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen bg-[#F7F8FA] flex items-center justify-center px-6 py-12">
+      <Card className="p-8 max-w-md w-full text-center">
+        <div className="w-16 h-16 bg-[#2F7D7E]/10 rounded-full flex items-center justify-center mx-auto mb-5">
+          <CheckCircle className="w-8 h-8 text-[#2F7D7E]" />
+        </div>
+        <h1 className="text-xl font-bold text-[#172033] mb-2">
+          {t("candidateFlow.alreadySubmitted.title")}
+        </h1>
+        <p className="text-sm text-[#6B7280] leading-relaxed mb-6">
+          {t("candidateFlow.alreadySubmitted.body", { name: candidateName })}
+        </p>
+        <div className="space-y-2">
+          <PrimaryBtn
+            onClick={() => navigate(`/app/reviewer/${candidateId}`)}
+            className="w-full justify-center text-sm"
+          >
+            {t("candidateFlow.alreadySubmitted.openReviewer")}
+          </PrimaryBtn>
+          <SecondaryBtn
+            onClick={() => navigate("/verify", { replace: true })}
+            className="w-full justify-center text-sm"
+          >
+            {t("candidateFlow.alreadySubmitted.startNew")}
+          </SecondaryBtn>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function CandidateFlowSession({ candidateId }: { candidateId: string }) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const candidate = getCandidate(candidateId)!;
+  const targetId = candidateId;
+
+  const [step, setStep] = useState<number>(() => getSubmission(targetId).step);
+
+  useEffect(() => {
+    setStepApi(targetId, step);
+  }, [targetId, step]);
 
   return (
     <div
@@ -696,6 +832,19 @@ function MediaCaptureStep({
   const [saved, setSaved] = useState<MediaAsset | undefined>(existing);
   const promptHintKind = kind === "video" ? "selfie" : "voice";
 
+  const skipForDemo = () => {
+    const seconds = kind === "video" ? 8 : 7;
+    const asset: MediaAsset = {
+      dataUrl: "",
+      mimeType: kind === "video" ? "video/webm" : "audio/webm",
+      size: 0,
+      durationSec: seconds,
+      placeholder: true,
+    };
+    setSaved(asset);
+    onSave(asset);
+  };
+
   useEffect(() => {
     if (videoRef.current && previewStream) {
       videoRef.current.srcObject = previewStream;
@@ -747,7 +896,17 @@ function MediaCaptureStep({
             <p className="text-xs text-[#9CA3AF] uppercase tracking-wider text-center font-semibold">
               {t(`candidateFlow.${promptHintKind}.preview`)}
             </p>
-            {kind === "video" ? (
+            {saved.placeholder ? (
+              <div className="rounded-xl border border-[#C6923A]/30 bg-[#C6923A]/5 px-4 py-6 text-center">
+                <p className="text-xs text-[#8A6422] leading-relaxed">
+                  <Info className="w-3 h-3 inline mr-1" />
+                  {t("candidateFlow.mediaSkip.notice")}
+                </p>
+                <p className="text-xs text-[#8A6422] font-semibold mt-1">
+                  {t("candidateFlow.mediaSkip.skipped", { seconds: Math.round(saved.durationSec ?? 0) })}
+                </p>
+              </div>
+            ) : kind === "video" ? (
               <video src={saved.dataUrl} controls className="w-full rounded-xl bg-black max-h-72" />
             ) : (
               <audio src={saved.dataUrl} controls className="w-full" />
@@ -808,19 +967,30 @@ function MediaCaptureStep({
               {icon}
             </div>
             <p className="font-medium text-sm text-[#374151] mb-3">{t(`candidateFlow.${promptHintKind}.ready`)}</p>
-            <button
-              onClick={start}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2F7D7E] text-white text-sm font-medium rounded-xl hover:bg-[#276970] transition-colors"
-            >
-              <Play className="w-4 h-4" /> {t(`candidateFlow.${promptHintKind}.start`)}
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={start}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2F7D7E] text-white text-sm font-medium rounded-xl hover:bg-[#276970] transition-colors"
+              >
+                <Play className="w-4 h-4" /> {t(`candidateFlow.${promptHintKind}.start`)}
+              </button>
+              <button
+                onClick={skipForDemo}
+                className="text-xs text-[#6B7280] hover:text-[#374151] underline underline-offset-2"
+              >
+                {t("candidateFlow.mediaSkip.label")}
+              </button>
+            </div>
           </div>
         )}
       </div>
 
       {permissionError && (
         <div className="mb-4 p-3 bg-[#C6923A]/10 border border-[#C6923A]/30 rounded-lg text-xs text-[#8A6422]">
-          {permissionError}
+          <p className="mb-2">{permissionError}</p>
+          <SecondaryBtn onClick={skipForDemo} className="text-xs py-1.5">
+            {t("candidateFlow.mediaSkip.label")}
+          </SecondaryBtn>
         </div>
       )}
 

@@ -281,6 +281,7 @@
     "selfieVideo": "셀피 영상",
     "voiceSample": "음성 샘플",
     "mediaEmpty": "미제출",
+    "mediaPlaceholder": "데모 자리표시자 ({{seconds}}초)",
     "quickActions": "빠른 액션",
     "openReviewerReview": "리뷰어 검토 열기",
     "sendCopyLink": "검증 링크 보내기 / 복사",
@@ -468,6 +469,28 @@
     "submitVerification": "검증 제출하기 →",
     "missingLink": "이 검증 링크가 유효하지 않거나 만료되었습니다. 채용팀에 새 링크를 요청해 주세요.",
     "backToHome": "홈으로",
+    "intro": {
+      "title": "후보자 검증 플로우 체험",
+      "lead": "실제 후보자가 보는 8단계 제출 절차를 그대로 진행해 보세요. 동의 → 기본 정보 → 포트폴리오 → 마스킹 문서 → 셀피 → 음성 → 검토 → 제출.",
+      "noteTitle": "데모 세션입니다",
+      "noteBody": "여러분 전용 데모 후보자를 즉시 생성합니다. 입력한 모든 자료는 브라우저(localStorage)에만 남으며 서버로 전송되거나 다른 사용자와 공유되지 않습니다.",
+      "feature1": "실제 파일 업로드 + 마이크/카메라 녹화 (이 디바이스에서는 미디어 단계 건너뛰기도 가능)",
+      "feature2": "영어/한국어 지원 — 우측 상단 토글",
+      "feature3": "제출 후 관리자 파이프라인에 새 후보자로 표시",
+      "start": "데모 검증 시작",
+      "alreadyHave": "이미 검증 링크가 있으신가요? 브라우저 주소창에 붙여넣으세요."
+    },
+    "alreadySubmitted": {
+      "title": "이미 제출이 완료되었습니다",
+      "body": "{{name}} 님의 검증이 완료된 상태입니다. 리뷰어 콘솔에서 신호를 검토하거나, 새 데모 세션을 시작할 수 있습니다.",
+      "openReviewer": "리뷰어 콘솔 열기",
+      "startNew": "새 데모 세션 시작"
+    },
+    "mediaSkip": {
+      "label": "데모 진행을 위해 건너뛰기",
+      "skipped": "데모 자리표시자 기록됨 ({{seconds}}초)",
+      "notice": "카메라/마이크 권한이 허용되지 않아 이 단계는 데모 자리표시자를 사용합니다."
+    },
     "step": {
       "consent": "동의",
       "basicInfo": "기본 정보",

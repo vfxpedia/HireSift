@@ -60,6 +60,12 @@ export interface MediaAsset {
   size: number;
   fileName?: string;
   durationSec?: number;
+  /**
+   * True when the candidate skipped capture (e.g. denied camera/mic
+   * access during the demo) and we recorded a placeholder so the
+   * downstream flow can still proceed.
+   */
+  placeholder?: boolean;
 }
 
 export interface CandidateSubmission {
