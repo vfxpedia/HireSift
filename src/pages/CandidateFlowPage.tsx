@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { LanguageToggle } from "../components/primitives/LanguageToggle";
 import {
   Shield,
@@ -78,11 +78,9 @@ export default function CandidateFlowPage() {
     return (
       <div className="min-h-screen bg-[#F7F8FA] flex items-center justify-center p-6">
         <Card className="p-8 max-w-sm text-center">
-          <h2 className="text-base font-bold text-[#172033] mb-2">No verification request</h2>
-          <p className="text-sm text-[#6B7280] mb-5">
-            This verification link is invalid or expired. Please contact the hiring team for a new link.
-          </p>
-          <PrimaryBtn onClick={() => navigate("/")}>Back to home</PrimaryBtn>
+          <h2 className="text-base font-bold text-[#172033] mb-2">{t("candidateFlow.title")}</h2>
+          <p className="text-sm text-[#6B7280] mb-5">{t("candidateFlow.missingLink")}</p>
+          <PrimaryBtn onClick={() => navigate("/")}>{t("candidateFlow.backToHome")}</PrimaryBtn>
         </Card>
       </div>
     );
@@ -230,6 +228,7 @@ function ConsentStep({
   candidateId: string;
   onAdvance: () => void;
 }) {
+  const { t } = useTranslation();
   const submission = getSubmission(candidateId);
   const [agreed, setAgreed] = useState(submission.consent.agreed);
 
@@ -240,54 +239,44 @@ function ConsentStep({
     onAdvance();
   };
 
+  const collectKeys = ["collect1", "collect2", "collect3", "collect4", "collect5"];
+  const notKeys = ["not1", "not2", "not3", "not4"];
+
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Consent & Privacy Notice</h2>
-      <p className="text-sm text-[#6B7280] mb-6">
-        Please review and confirm your consent before submitting any information.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.consent.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-6">{t("candidateFlow.consent.intro")}</p>
       <Card className="p-5 mb-4">
-        <h3 className="font-semibold text-sm text-[#111827] mb-3">What we collect</h3>
+        <h3 className="font-semibold text-sm text-[#111827] mb-3">{t("candidateFlow.consent.whatWeCollect")}</h3>
         <div className="space-y-2 text-sm text-[#374151]">
-          {[
-            "Basic contact and identification information",
-            "Portfolio and work sample links",
-            "A masked copy of an identity document or certificate",
-            "A short selfie video sample (5–10 seconds)",
-            "A short voice sample (5–10 seconds)",
-          ].map((item) => (
-            <div key={item} className="flex items-start gap-2.5">
+          {collectKeys.map((k) => (
+            <div key={k} className="flex items-start gap-2.5">
               <CheckCircle className="w-4 h-4 text-[#2F7D7E] mt-0.5 shrink-0" />
-              <p>{item}</p>
+              <p>{t(`candidateFlow.consent.${k}`)}</p>
             </div>
           ))}
         </div>
       </Card>
       <Card className="p-5 mb-4">
-        <h3 className="font-semibold text-sm text-[#111827] mb-3">What we do NOT do</h3>
+        <h3 className="font-semibold text-sm text-[#111827] mb-3">{t("candidateFlow.consent.whatNot")}</h3>
         <div className="space-y-2 text-sm text-[#374151]">
-          {[
-            "Automatically reject or approve your application",
-            "Perform lie detection or emotion analysis",
-            "Share your data with third parties without disclosure",
-            "Make any hiring decision automatically",
-          ].map((item) => (
-            <div key={item} className="flex items-start gap-2.5">
+          {notKeys.map((k) => (
+            <div key={k} className="flex items-start gap-2.5">
               <X className="w-4 h-4 text-[#C6923A] mt-0.5 shrink-0" />
-              <p>{item}</p>
+              <p>{t(`candidateFlow.consent.${k}`)}</p>
             </div>
           ))}
         </div>
       </Card>
       <Card className="p-5 mb-5">
-        <h3 className="font-semibold text-sm text-[#111827] mb-2">Data retention</h3>
+        <h3 className="font-semibold text-sm text-[#111827] mb-2">{t("candidateFlow.consent.retentionTitle")}</h3>
         <p className="text-sm text-[#6B7280]">
-          Your submitted materials are stored for 90 days unless you request earlier deletion. You may
-          contact{" "}
-          <a href="mailto:privacy@hiresift.com" className="text-[#2F7D7E] hover:underline">
-            privacy@hiresift.com
-          </a>{" "}
-          at any time to request deletion or review.
+          <Trans
+            i18nKey="candidateFlow.consent.retentionBody"
+            components={[
+              <a href="mailto:privacy@hiresift.com" className="text-[#2F7D7E] hover:underline" />,
+            ]}
+          />
         </p>
       </Card>
       <label className="flex items-start gap-3 cursor-pointer mb-6">
@@ -297,14 +286,11 @@ function ConsentStep({
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-0.5 w-4 h-4 rounded accent-[#2F7D7E]"
         />
-        <span className="text-sm text-[#374151]">
-          I have read and understood the privacy notice. I consent to submit the materials listed above
-          for verification purposes.
-        </span>
+        <span className="text-sm text-[#374151]">{t("candidateFlow.consent.agreement")}</span>
       </label>
       <div className="flex justify-end">
         <PrimaryBtn onClick={submit} disabled={!agreed}>
-          I agree — Continue →
+          {t("candidateFlow.agreeContinue")}
         </PrimaryBtn>
       </div>
     </div>
@@ -325,6 +311,7 @@ function BasicInfoStep({
   defaultEmail: string;
   defaultName: string;
 }) {
+  const { t } = useTranslation();
   const existing = getSubmission(candidateId).basicInfo;
   const {
     register,
@@ -346,55 +333,49 @@ function BasicInfoStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Basic Information</h2>
-      <p className="text-sm text-[#6B7280] mb-6">
-        Please provide your basic contact information for verification.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.basicInfo.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-6">{t("candidateFlow.basicInfo.intro")}</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Field label="Full name" error={errors.fullName?.message}>
+        <Field label={t("candidateFlow.basicInfo.fullName")} error={errors.fullName?.message}>
           <TextInput
-            placeholder="As it appears on official documents"
+            placeholder={t("candidateFlow.basicInfo.fullNamePlaceholder")}
             error={!!errors.fullName}
-            {...register("fullName", { required: "Required" })}
+            {...register("fullName", { required: t("modals.createVerification.errorRequired") })}
           />
         </Field>
-        <Field label="Email address" error={errors.email?.message}>
+        <Field label={t("candidateFlow.basicInfo.email")} error={errors.email?.message}>
           <TextInput
             type="email"
-            placeholder="Your primary email"
+            placeholder={t("candidateFlow.basicInfo.emailPlaceholder")}
             error={!!errors.email}
             {...register("email", {
-              required: "Required",
-              pattern: { value: /\S+@\S+\.\S+/, message: "Enter a valid email" },
+              required: t("modals.createVerification.errorRequired"),
+              pattern: { value: /\S+@\S+\.\S+/, message: t("modals.createVerification.errorInvalidEmail") },
             })}
           />
         </Field>
-        <Field label="Country of residence" error={errors.country?.message}>
+        <Field label={t("candidateFlow.basicInfo.country")} error={errors.country?.message}>
           <TextInput
-            placeholder="e.g. South Korea"
+            placeholder={t("candidateFlow.basicInfo.countryPlaceholder")}
             error={!!errors.country}
-            {...register("country", { required: "Required" })}
+            {...register("country", { required: t("modals.createVerification.errorRequired") })}
           />
         </Field>
-        <Field label="LinkedIn profile URL" optional>
-          <TextInput
-            placeholder="https://linkedin.com/in/yourname"
-            {...register("linkedin")}
-          />
+        <Field label={t("candidateFlow.basicInfo.linkedin")} optional>
+          <TextInput placeholder="https://linkedin.com/in/yourname" {...register("linkedin")} />
         </Field>
         <div className="mt-2 p-3 bg-[#F7F8FA] rounded-xl">
           <p className="text-xs text-[#6B7280]">
             <Info className="w-3 h-3 inline mr-1" />
-            Only provide information you are comfortable sharing. You may use a name that matches your
-            professional identity.
+            {t("candidateFlow.basicInfo.infoNote")}
           </p>
         </div>
         <div className="flex gap-3 pt-2">
           <SecondaryBtn onClick={onBack} className="text-sm">
-            ← Back
+            {t("candidateFlow.back")}
           </SecondaryBtn>
           <PrimaryBtn type="submit" className="text-sm ml-auto">
-            Continue →
+            {t("candidateFlow.continue")}
           </PrimaryBtn>
         </div>
       </form>
@@ -412,6 +393,7 @@ function PortfolioStep({
   onBack: () => void;
   onAdvance: () => void;
 }) {
+  const { t } = useTranslation();
   const PLATFORMS = ["GitHub", "LinkedIn", "Behance", "Personal Website"];
   const existing = getSubmission(candidateId).portfolio;
   const [links, setLinks] = useState<Record<string, string>>(() =>
@@ -427,12 +409,12 @@ function PortfolioStep({
       .filter(([, url]) => url.trim().length > 0)
       .map(([platform, url]) => ({ platform, url: url.trim() }));
     if (cleaned.length === 0) {
-      setError("Please provide at least one portfolio link.");
+      setError(t("candidateFlow.portfolio.errorRequired"));
       return;
     }
     const invalid = cleaned.find((l) => !/^https?:\/\//.test(l.url));
     if (invalid) {
-      setError(`Please include https:// in your ${invalid.platform} URL.`);
+      setError(t("candidateFlow.portfolio.errorInvalid", { platform: invalid.platform }));
       return;
     }
     savePortfolio(candidateId, cleaned);
@@ -441,17 +423,11 @@ function PortfolioStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Portfolio Links</h2>
-      <p className="text-sm text-[#6B7280] mb-6">
-        Share links to your professional profiles and work samples. At least one is required.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.portfolio.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-6">{t("candidateFlow.portfolio.intro")}</p>
       <div className="space-y-3">
         {PLATFORMS.map((p) => (
-          <Field
-            key={p}
-            label={p}
-            optional={p !== "GitHub" && p !== "LinkedIn"}
-          >
+          <Field key={p} label={p} optional={p !== "GitHub" && p !== "LinkedIn"}>
             <TextInput
               placeholder={`https://${p.toLowerCase().replace(" ", "")}.com/yourname`}
               value={links[p]}
@@ -468,16 +444,15 @@ function PortfolioStep({
       <div className="mt-4 p-3 bg-[#F7F8FA] rounded-xl">
         <p className="text-xs text-[#6B7280]">
           <Info className="w-3 h-3 inline mr-1" />
-          Portfolio links are reviewed for account age, activity patterns, and ownership consistency —
-          not to judge the quality of your work.
+          {t("candidateFlow.portfolio.infoNote")}
         </p>
       </div>
       <div className="flex gap-3 pt-4">
         <SecondaryBtn onClick={onBack} className="text-sm">
-          ← Back
+          {t("candidateFlow.back")}
         </SecondaryBtn>
         <PrimaryBtn onClick={submit} className="text-sm ml-auto">
-          Continue →
+          {t("candidateFlow.continue")}
         </PrimaryBtn>
       </div>
     </div>
@@ -494,6 +469,7 @@ function DocumentStep({
   onBack: () => void;
   onAdvance: () => void;
 }) {
+  const { t } = useTranslation();
   const existing = getSubmission(candidateId).document;
   const [asset, setAsset] = useState<MediaAsset | undefined>(existing);
   const [error, setError] = useState<string | null>(null);
@@ -502,12 +478,12 @@ function DocumentStep({
   const onFile = async (file: File) => {
     setError(null);
     if (file.size > 5 * 1024 * 1024) {
-      setError("File is larger than 5MB.");
+      setError(t("candidateFlow.document.errorTooLarge"));
       return;
     }
     const accepted = ["image/png", "image/jpeg", "application/pdf"];
     if (!accepted.includes(file.type)) {
-      setError("Accepted formats: PDF, PNG, JPG.");
+      setError(t("candidateFlow.document.errorInvalidType"));
       return;
     }
     const dataUrl = await new Promise<string>((res, rej) => {
@@ -527,7 +503,7 @@ function DocumentStep({
 
   const submit = () => {
     if (!asset) {
-      setError("Please upload a masked document before continuing.");
+      setError(t("candidateFlow.document.errorMissing"));
       return;
     }
     saveDocument(candidateId, asset);
@@ -542,21 +518,14 @@ function DocumentStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Masked Document Upload</h2>
-      <p className="text-sm text-[#6B7280] mb-4">
-        Upload a masked version of an identity document or professional certificate.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.document.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-4">{t("candidateFlow.document.intro")}</p>
       <Card className="p-4 mb-5 border-[#C6923A]/20 bg-[#C6923A]/5">
         <div className="flex items-start gap-2.5">
           <Info className="w-4 h-4 text-[#C6923A] mt-0.5 shrink-0" />
           <div className="text-xs text-[#8A6422]">
-            <p className="font-semibold mb-1">
-              Important: Mask sensitive information before uploading.
-            </p>
-            <p>
-              Cover or blur your full ID number, date of birth, and any other unnecessary personal
-              details. You may show only the name field and document type.
-            </p>
+            <p className="font-semibold mb-1">{t("candidateFlow.document.warningTitle")}</p>
+            <p>{t("candidateFlow.document.warningBody")}</p>
           </div>
         </div>
       </Card>
@@ -569,8 +538,8 @@ function DocumentStep({
           className="border-2 border-dashed border-[#E5E7EB] rounded-2xl p-8 text-center hover:border-[#2F7D7E]/40 transition-colors cursor-pointer bg-[#F9FAFB] mb-4"
         >
           <Upload className="w-8 h-8 text-[#9CA3AF] mx-auto mb-3" />
-          <p className="font-medium text-sm text-[#374151] mb-1">Click to upload or drag and drop</p>
-          <p className="text-xs text-[#9CA3AF]">PDF, JPG, or PNG — max 5MB</p>
+          <p className="font-medium text-sm text-[#374151] mb-1">{t("candidateFlow.document.dropTitle")}</p>
+          <p className="text-xs text-[#9CA3AF]">{t("candidateFlow.document.dropFormats")}</p>
           <input
             ref={inputRef}
             type="file"
@@ -586,7 +555,7 @@ function DocumentStep({
         <Card className="p-4 mb-4 border-[#2F7D7E]/30 bg-[#2F7D7E]/5">
           <div className="flex items-center gap-1.5 text-xs text-[#2F7D7E] font-semibold mb-3">
             <CheckCircle className="w-3.5 h-3.5" />
-            Uploaded successfully
+            {t("candidateFlow.document.uploadedOk")}
           </div>
           <div className="flex items-start gap-4">
             {asset.mimeType.startsWith("image/") ? (
@@ -607,7 +576,7 @@ function DocumentStep({
               </p>
               <div className="mt-3 flex gap-2">
                 <SecondaryBtn onClick={() => setAsset(undefined)} className="text-xs py-1.5">
-                  Replace file
+                  {t("candidateFlow.document.replaceFile")}
                 </SecondaryBtn>
               </div>
             </div>
@@ -621,17 +590,14 @@ function DocumentStep({
         </div>
       )}
 
-      <p className="text-xs text-[#6B7280] mb-6">
-        Accepted: Passport (masked), Professional certificate, Driver license (masked), Employment
-        verification letter.
-      </p>
+      <p className="text-xs text-[#6B7280] mb-6">{t("candidateFlow.document.accepted")}</p>
 
       <div className="flex gap-3">
         <SecondaryBtn onClick={onBack} className="text-sm">
-          ← Back
+          {t("candidateFlow.back")}
         </SecondaryBtn>
         <PrimaryBtn onClick={submit} className="text-sm ml-auto">
-          Continue →
+          {t("candidateFlow.continue")}
         </PrimaryBtn>
       </div>
     </div>
@@ -648,19 +614,20 @@ function SelfieStep({
   onBack: () => void;
   onAdvance: () => void;
 }) {
+  const { t } = useTranslation();
   const existing = getSubmission(candidateId).selfie;
   return (
     <MediaCaptureStep
       kind="video"
-      title="Selfie Video Sample"
-      description="Record a short 5–10 second video sample for session integrity review."
-      promptText='Look at the camera and say: "I am [your name] and I confirm this verification."'
+      title={t("candidateFlow.selfie.title")}
+      description={t("candidateFlow.selfie.intro")}
+      promptText={t("candidateFlow.selfie.prompt")}
       maxDurationSec={10}
       existing={existing}
       onSave={(asset) => saveSelfie(candidateId, asset)}
       onBack={onBack}
       onAdvance={onAdvance}
-      footerNote="This sample is used only for session integrity review. No emotion or sentiment analysis is performed."
+      footerNote={t("candidateFlow.selfie.footerNote")}
       icon={<Video className="w-7 h-7 text-[#172033]/40" />}
     />
   );
@@ -678,19 +645,20 @@ function VoiceStep({
   onAdvance: () => void;
   candidateName: string;
 }) {
+  const { t } = useTranslation();
   const existing = getSubmission(candidateId).voice;
   return (
     <MediaCaptureStep
       kind="audio"
-      title="Voice Sample"
-      description="Record a short 5–10 second voice sample by reading the provided phrase."
-      promptText={`"My name is ${candidateName}. Today is ${new Date().toLocaleDateString()}. I am submitting this verification for my remote hiring review."`}
+      title={t("candidateFlow.voice.title")}
+      description={t("candidateFlow.voice.intro")}
+      promptText={t("candidateFlow.voice.prompt", { name: candidateName, date: new Date().toLocaleDateString() })}
       maxDurationSec={10}
       existing={existing}
       onSave={(asset) => saveVoice(candidateId, asset)}
       onBack={onBack}
       onAdvance={onAdvance}
-      footerNote="Voice samples are used for session consistency review only. No voice biometric profiling is performed."
+      footerNote={t("candidateFlow.voice.footerNote")}
       icon={<Mic className="w-7 h-7 text-[#172033]/40" />}
     />
   );
@@ -721,10 +689,12 @@ function MediaCaptureStep({
   footerNote: string;
   icon: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const { isRecording, elapsed, previewStream, permissionError, result, start, stop, reset } =
     useMediaRecorder({ kind, maxDurationSec });
   const videoRef = useRef<HTMLVideoElement>(null);
   const [saved, setSaved] = useState<MediaAsset | undefined>(existing);
+  const promptHintKind = kind === "video" ? "selfie" : "voice";
 
   useEffect(() => {
     if (videoRef.current && previewStream) {
@@ -767,7 +737,7 @@ function MediaCaptureStep({
       <p className="text-sm text-[#6B7280] mb-4">{description}</p>
 
       <Card className="p-4 bg-[#F7F8FA] border-[#E5E7EB] mb-4">
-        <p className="text-xs text-[#6B7280] mb-2">Please {kind === "video" ? "read this aloud while recording" : "read this phrase clearly"}:</p>
+        <p className="text-xs text-[#6B7280] mb-2">{t(`candidateFlow.${promptHintKind}.prompt`) ? "" : null}</p>
         <p className="text-sm font-medium text-[#111827] leading-relaxed italic">{promptText}</p>
       </Card>
 
@@ -775,7 +745,7 @@ function MediaCaptureStep({
         {saved ? (
           <div className="space-y-4">
             <p className="text-xs text-[#9CA3AF] uppercase tracking-wider text-center font-semibold">
-              Recorded preview
+              {t(`candidateFlow.${promptHintKind}.preview`)}
             </p>
             {kind === "video" ? (
               <video src={saved.dataUrl} controls className="w-full rounded-xl bg-black max-h-72" />
@@ -783,15 +753,13 @@ function MediaCaptureStep({
               <audio src={saved.dataUrl} controls className="w-full" />
             )}
             <div className="flex items-center justify-center gap-3 text-xs text-[#6B7280]">
-              <span>
-                Duration: {Math.round(saved.durationSec ?? 0)}s
-              </span>
+              <span>{t(`candidateFlow.${promptHintKind}.duration`, { seconds: Math.round(saved.durationSec ?? 0) })}</span>
               <span>·</span>
-              <span>Size: {(saved.size / 1024).toFixed(1)} KB</span>
+              <span>{(saved.size / 1024).toFixed(1)} KB</span>
             </div>
             <div className="flex justify-center">
               <SecondaryBtn onClick={onRetake} icon={<RefreshCw className="w-4 h-4" />}>
-                Re-record
+                {t(`candidateFlow.${promptHintKind}.rerecord`)}
               </SecondaryBtn>
             </div>
           </div>
@@ -808,13 +776,13 @@ function MediaCaptureStep({
                 <div className="w-20 h-20 bg-[#C6923A]/10 rounded-full flex items-center justify-center mb-3 animate-pulse">
                   <Mic className="w-8 h-8 text-[#C6923A]" />
                 </div>
-                <p className="text-sm text-[#374151] font-medium">Recording…</p>
+                <p className="text-sm text-[#374151] font-medium">{t(`candidateFlow.${promptHintKind}.stop`)}…</p>
               </div>
             )}
             <div className="flex items-center justify-between text-xs text-[#6B7280]">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#C6923A] animate-pulse" />
-                Recording · {elapsed.toFixed(1)}s
+                {elapsed.toFixed(1)}s
               </div>
               <span>{maxDurationSec.toFixed(0)}s max</span>
             </div>
@@ -830,7 +798,7 @@ function MediaCaptureStep({
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#172033] text-white text-sm font-medium rounded-xl hover:bg-[#1e2d47]"
               >
                 <Square className="w-4 h-4" />
-                Stop recording
+                {t(`candidateFlow.${promptHintKind}.stop`)}
               </button>
             </div>
           </div>
@@ -839,17 +807,13 @@ function MediaCaptureStep({
             <div className="w-16 h-16 bg-[#172033]/5 rounded-full flex items-center justify-center mx-auto mb-4">
               {icon}
             </div>
-            <p className="font-medium text-sm text-[#374151] mb-3">Ready to record</p>
+            <p className="font-medium text-sm text-[#374151] mb-3">{t(`candidateFlow.${promptHintKind}.ready`)}</p>
             <button
               onClick={start}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2F7D7E] text-white text-sm font-medium rounded-xl hover:bg-[#276970] transition-colors"
             >
-              <Play className="w-4 h-4" /> Start Recording
+              <Play className="w-4 h-4" /> {t(`candidateFlow.${promptHintKind}.start`)}
             </button>
-            <p className="text-xs text-[#9CA3AF] mt-3">
-              Your {kind === "video" ? "camera and microphone" : "microphone"} will be used briefly for
-              this step only.
-            </p>
           </div>
         )}
       </div>
@@ -867,10 +831,10 @@ function MediaCaptureStep({
 
       <div className="flex gap-3">
         <SecondaryBtn onClick={onBack} className="text-sm">
-          ← Back
+          {t("candidateFlow.back")}
         </SecondaryBtn>
         <PrimaryBtn onClick={onContinue} className="text-sm ml-auto" disabled={!saved}>
-          Continue →
+          {t("candidateFlow.continue")}
         </PrimaryBtn>
       </div>
     </div>
@@ -887,34 +851,39 @@ function ReviewStep({
   onBack: () => void;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation();
   const sub = getSubmission(candidateId);
 
   const sections = [
-    { label: "Consent", done: sub.consent.agreed, note: undefined },
+    { label: t("candidateFlow.review.consent"), done: sub.consent.agreed, note: undefined as string | undefined },
     {
-      label: "Basic Information",
+      label: t("candidateFlow.review.basicInfo"),
       done: !!sub.basicInfo,
       note: sub.basicInfo?.fullName,
     },
     {
-      label: "Portfolio Links",
+      label: t("candidateFlow.review.portfolioLinks"),
       done: sub.portfolio.length > 0,
-      note: `${sub.portfolio.length} link(s) provided`,
+      note: t("candidateFlow.review.linksProvided", { count: sub.portfolio.length }),
     },
     {
-      label: "Masked Document",
+      label: t("candidateFlow.review.documentLabel"),
       done: !!sub.document,
       note: sub.document?.fileName,
     },
     {
-      label: "Selfie Video",
+      label: t("candidateFlow.review.selfieLabel"),
       done: !!sub.selfie,
-      note: sub.selfie ? `${Math.round(sub.selfie.durationSec ?? 0)}s recorded` : undefined,
+      note: sub.selfie
+        ? t("candidateFlow.review.secondsRecorded", { seconds: Math.round(sub.selfie.durationSec ?? 0) })
+        : undefined,
     },
     {
-      label: "Voice Sample",
+      label: t("candidateFlow.review.voiceLabel"),
       done: !!sub.voice,
-      note: sub.voice ? `${Math.round(sub.voice.durationSec ?? 0)}s recorded` : undefined,
+      note: sub.voice
+        ? t("candidateFlow.review.secondsRecorded", { seconds: Math.round(sub.voice.durationSec ?? 0) })
+        : undefined,
     },
   ];
 
@@ -922,10 +891,8 @@ function ReviewStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Review Your Submission</h2>
-      <p className="text-sm text-[#6B7280] mb-6">
-        Review your submitted materials before final submission.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.review.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-6">{t("candidateFlow.review.intro")}</p>
       <Card className="divide-y divide-[#E5E7EB] mb-5">
         {sections.map((s) => (
           <div key={s.label} className="flex items-center justify-between px-4 py-3">
@@ -940,7 +907,7 @@ function ReviewStep({
                 s.done ? "text-[#2F7D7E]" : "text-[#9CA3AF]",
               )}
             >
-              {s.done ? "Ready" : "Missing"}
+              {s.done ? t("common.ready") : t("common.missing")}
             </span>
           </div>
         ))}
@@ -948,10 +915,10 @@ function ReviewStep({
       <GuardrailNotice />
       <div className="flex gap-3 pt-4">
         <SecondaryBtn onClick={onBack} className="text-sm">
-          ← Back
+          {t("candidateFlow.back")}
         </SecondaryBtn>
         <PrimaryBtn onClick={onSubmit} className="text-sm ml-auto" disabled={!allReady}>
-          Submit Verification →
+          {t("candidateFlow.submitVerification")}
         </PrimaryBtn>
       </div>
     </div>
@@ -966,39 +933,35 @@ function CompleteStep({
   candidateId: string;
   onBackToHome: () => void;
 }) {
+  const { t } = useTranslation();
   const sub = getSubmission(candidateId);
   const submittedAt = sub.submittedAt ? new Date(sub.submittedAt) : new Date();
+  const ackKeys = ["ack1", "ack2", "ack3", "ack4"];
 
   return (
     <div className="text-center py-8">
       <div className="w-16 h-16 bg-[#2F7D7E]/10 rounded-full flex items-center justify-center mx-auto mb-5">
         <CheckCircle className="w-8 h-8 text-[#2F7D7E]" />
       </div>
-      <h2 className="text-xl font-bold text-[#172033] mb-2">Submission Complete</h2>
-      <p className="text-sm text-[#6B7280] mb-6 max-w-sm mx-auto">
-        Your verification materials have been securely submitted. A human reviewer will check your
-        signals and the hiring team will be notified.
-      </p>
+      <h2 className="text-xl font-bold text-[#172033] mb-2">{t("candidateFlow.complete.title")}</h2>
+      <p className="text-sm text-[#6B7280] mb-6 max-w-sm mx-auto">{t("candidateFlow.complete.intro")}</p>
       <Card className="p-4 text-left max-w-sm mx-auto mb-6">
         <div className="space-y-2 text-xs text-[#374151]">
-          {[
-            "Your submission has been received securely.",
-            "A human reviewer will inspect the signals.",
-            "This does not automatically determine your hiring outcome.",
-            "You may request deletion at: privacy@hiresift.com",
-          ].map((item) => (
-            <div key={item} className="flex items-start gap-2">
+          {ackKeys.map((k) => (
+            <div key={k} className="flex items-start gap-2">
               <Check className="w-3.5 h-3.5 text-[#2F7D7E] mt-0.5 shrink-0" />
-              {item}
+              {t(`candidateFlow.complete.${k}`)}
             </div>
           ))}
         </div>
       </Card>
       <p className="text-xs text-[#9CA3AF] mb-4">
-        Reference: {sub.reference ?? "—"} · Submitted{" "}
-        {submittedAt.toLocaleDateString()}
+        {t("candidateFlow.complete.referenceLine", {
+          ref: sub.reference ?? "—",
+          date: submittedAt.toLocaleDateString(),
+        })}
       </p>
-      <SecondaryBtn onClick={onBackToHome}>Back to home</SecondaryBtn>
+      <SecondaryBtn onClick={onBackToHome}>{t("candidateFlow.backToHome")}</SecondaryBtn>
     </div>
   );
 }

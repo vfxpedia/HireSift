@@ -99,7 +99,104 @@
     "scopeOut": "Out of Scope",
     "pricingHeading": "Simple, transparent pricing",
     "mostPopular": "Most Popular",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "workflowSteps": [
+      { "num": "01", "title": "Create Verification Request", "desc": "Admin sends a secure verification link to the candidate." },
+      { "num": "02", "title": "Candidate Submits Signals", "desc": "Candidate completes a guided submission: identity, portfolio, media samples." },
+      { "num": "03", "title": "Reviewer Inspects Signals", "desc": "Human reviewer checks each signal category and adds notes." },
+      { "num": "04", "title": "Trust Report Generated", "desc": "A structured Candidate Trust Report is delivered for team review." }
+    ],
+    "features": [
+      { "title": "Identity Consistency Review", "desc": "Organize submitted identity signals for structured human review." },
+      { "title": "Portfolio Provenance", "desc": "Review portfolio account age, activity patterns, and ownership consistency." },
+      { "title": "Interview Session Integrity", "desc": "Collect and organize media samples for reviewer inspection." },
+      { "title": "Human-in-the-Loop Review", "desc": "Every signal is reviewed by a human before any recommendation is made." },
+      { "title": "Candidate Trust Report", "desc": "Generate structured, audit-ready reports to support your hiring team." },
+      { "title": "Privacy by Design", "desc": "Minimal data collection, masked document uploads, transparent consent." }
+    ],
+    "trustItems": [
+      "No automatic rejection — human decision required",
+      "Masked document uploads — no unnecessary data",
+      "Candidate consent is explicit and documented",
+      "\"Attention\" signals, not fraud accusations",
+      "Clear data retention and deletion policy",
+      "Every report reviewed by a human reviewer"
+    ],
+    "trustCards": [
+      { "title": "We say \"Review Recommended\"", "desc": "Not \"Fraud Detected\" or \"Fake Candidate\" — ever." },
+      { "title": "Human-in-the-Loop Required", "desc": "AI organizes signals. Humans make all decisions." },
+      { "title": "Minimal Data, Maximum Transparency", "desc": "Candidates always know what is collected and why." }
+    ],
+    "scopeItems": {
+      "mvp": [
+        "Candidate verification request",
+        "Candidate consent flow",
+        "Candidate submission flow",
+        "Portfolio link collection",
+        "Masked document upload",
+        "Selfie video sample",
+        "Voice sample",
+        "Reviewer dashboard",
+        "Candidate Trust Report",
+        "PDF export preview"
+      ],
+      "future": [
+        "ATS integration",
+        "Advanced face verification",
+        "Advanced speaker verification",
+        "Live interview plugin",
+        "Enterprise compliance dashboard",
+        "Candidate appeal workflow",
+        "Multi-organization admin",
+        "Audit-ready enterprise log exports"
+      ],
+      "outOfScope": [
+        "Automatic rejection",
+        "Lie detection",
+        "Emotion analysis",
+        "Personality analysis",
+        "Fully automated fraud judgment",
+        "Replacing background check vendors",
+        "Replacing Zoom or Google Meet"
+      ]
+    },
+    "pricingPlans": [
+      {
+        "plan": "Starter",
+        "price": "$49",
+        "period": "/mo",
+        "seats": "Up to 3 hiring seats",
+        "verifications": "20 verifications/mo",
+        "features": ["Candidate submission flow", "Trust Report", "PDF export", "Email support"]
+      },
+      {
+        "plan": "Growth",
+        "price": "$149",
+        "period": "/mo",
+        "seats": "Up to 10 hiring seats",
+        "verifications": "100 verifications/mo",
+        "features": ["All Starter features", "Reviewer dashboard", "Audit log", "Priority support", "Data retention controls"]
+      },
+      {
+        "plan": "Enterprise",
+        "price": "Custom",
+        "period": "",
+        "seats": "Unlimited seats",
+        "verifications": "Unlimited verifications",
+        "features": ["All Growth features", "ATS integration (coming)", "Enterprise compliance log", "Dedicated support", "Custom consent templates"]
+      }
+    ],
+    "footerCopyright": "© 2026 HireSift. HireSift does not make automatic hiring decisions. All reports require human review.",
+    "heroPreview": {
+      "label": "Candidate Trust Report",
+      "humanReviewed": "Human Reviewed",
+      "identity": "Identity",
+      "portfolio": "Portfolio",
+      "session": "Session",
+      "recommendedAction": "Recommended Action",
+      "recommendedActionBody": "Request short portfolio walkthrough before final review.",
+      "disclaimer": "This report does not determine hiring eligibility."
+    }
   },
   "auth": {
     "signInTitle": "Sign in to HireSift",
