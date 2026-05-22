@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "불러오는 중…",
+    "save": "저장",
+    "saveDraft": "초안 저장",
+    "saved": "저장됨",
+    "cancel": "취소",
+    "close": "닫기",
+    "back": "뒤로",
+    "continue": "계속",
+    "submit": "제출",
+    "create": "생성",
+    "send": "전송",
+    "copy": "복사",
+    "copied": "복사됨",
+    "share": "공유",
+    "edit": "편집",
+    "delete": "삭제",
+    "search": "검색…",
+    "filter": "필터",
+    "viewAll": "전체 보기",
+    "viewReport": "리포트 보기",
+    "human": "사람 검토 완료",
+    "noAutoDecision": "자동 결정 없음",
+    "exportPdf": "PDF 내보내기",
+    "shareReport": "리포트 공유",
+    "dataRetention": "데이터 보관 기간",
+    "auditLog": "검토 이력",
+    "language": "언어"
+  },
+  "attention": {
+    "low": "낮은 검토 필요",
+    "medium": "일부 검토 필요",
+    "high": "높은 검토 필요",
+    "manual": "수동 검토 필요",
+    "additional": "추가 확인 필요"
+  },
+  "status": {
+    "pending": "대기 중",
+    "in-progress": "진행 중",
+    "submitted": "제출 완료",
+    "reviewed": "검토 완료",
+    "report-ready": "리포트 준비됨"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "candidates": "후보자",
+    "reviewer": "리뷰어",
+    "reports": "신뢰 리포트",
+    "settings": "설정",
+    "auditLog": "검토 이력",
+    "checklist": "체크리스트",
+    "groupOverview": "개요",
+    "groupHiring": "채용",
+    "groupReports": "리포트",
+    "groupAdmin": "관리",
+    "signOut": "로그아웃",
+    "switchOrg": "조직 전환"
+  },
+  "landing": {
+    "navHowItWorks": "이용 방법",
+    "navTrust": "신뢰 · 프라이버시",
+    "navScope": "범위",
+    "navPricing": "요금제",
+    "signIn": "로그인",
+    "requestDemo": "데모 요청",
+    "heroPill": "Human-in-the-loop · Privacy by Design",
+    "heroHeading": "원격 채용에는 신뢰 레이어가 필요합니다.",
+    "heroDesc": "HireSift는 원격 채용에서 신원·포트폴리오·면접 일관성 신호를 사람 검토 워크플로우로 정리해 채용 결정 전에 검토할 수 있도록 돕습니다.",
+    "ctaCreate": "검증 요청 만들기",
+    "ctaSample": "샘플 리포트 보기",
+    "ctaTryCandidate": "후보자로 체험하기",
+    "footerProduct": "제품",
+    "footerTrust": "신뢰",
+    "footerCompany": "회사",
+    "disclaimer": "거짓말 탐지기가 아닙니다. 자동 탈락 시스템이 아닙니다. 사람의 의사결정을 돕는 신뢰 검토 도구입니다."
+  },
+  "auth": {
+    "signInTitle": "HireSift 로그인",
+    "signInSubtitle": "채용팀을 위한 안전한 접속",
+    "workEmail": "업무 이메일",
+    "password": "비밀번호",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "backHome": "← 홈으로 돌아가기"
+  },
+  "candidateFlow": {
+    "title": "HireSift 검증",
+    "secure": "보안 세션",
+    "agreeContinue": "동의합니다 — 계속 →",
+    "step": {
+      "consent": "동의",
+      "basicInfo": "기본 정보",
+      "portfolio": "포트폴리오",
+      "document": "문서",
+      "selfie": "셀피",
+      "voice": "음성",
+      "review": "검토",
+      "complete": "완료"
+    },
+    "consent": {
+      "title": "동의 및 개인정보 안내",
+      "intro": "정보 제출 전에 동의 내용을 검토해 주세요."
+    },
+    "basicInfo": {
+      "title": "기본 정보",
+      "intro": "검증을 위해 기본 연락 정보를 입력해 주세요."
+    },
+    "portfolio": {
+      "title": "포트폴리오 링크",
+      "intro": "전문 프로필과 작업물 링크를 공유해 주세요. 하나 이상 필요합니다."
+    },
+    "document": {
+      "title": "마스킹 문서 업로드",
+      "intro": "신분증 또는 자격증의 마스킹 처리된 사본을 업로드해 주세요."
+    },
+    "selfie": {
+      "title": "셀피 영상 샘플",
+      "intro": "세션 무결성 검토를 위한 5–10초 짧은 영상 샘플을 녹화해 주세요."
+    },
+    "voice": {
+      "title": "음성 샘플",
+      "intro": "안내된 문구를 읽으며 5–10초 짧은 음성 샘플을 녹음해 주세요."
+    },
+    "review": {
+      "title": "제출 내용 검토",
+      "intro": "최종 제출 전에 제출한 자료를 검토해 주세요."
+    },
+    "complete": {
+      "title": "제출 완료",
+      "intro": "검증 자료가 안전하게 제출되었습니다. 사람 리뷰어가 신호를 확인한 뒤 채용팀에 결과가 전달됩니다."
+    }
+  },
+  "report": {
+    "title": "후보자 신뢰 검토 리포트",
+    "identityConsistency": "신원 일관성",
+    "portfolioProvenance": "포트폴리오 출처/소유 검토",
+    "interviewSessionIntegrity": "면접 세션 무결성",
+    "mediaSampleQuality": "미디어 샘플 품질",
+    "manualReviewStatus": "수동 검토 상태",
+    "reviewSignals": "검토 신호",
+    "recommendedAction": "권장 확인 조치",
+    "verificationSummary": "검증 요약",
+    "signalMatrix": "신호 매트릭스",
+    "signalOverview": "신호 개요",
+    "attentionDistribution": "주의 분포",
+    "sectionCompletion": "섹션 완료율",
+    "evidenceCards": "증거 카드",
+    "reviewerNotes": "리뷰어 노트",
+    "consentNotice": "동의 및 개인정보 안내",
+    "maskedDocumentUpload": "마스킹 문서 업로드",
+    "voiceSample": "음성 샘플",
+    "selfieVideo": "셀피 영상",
+    "exportPdf": "PDF 내보내기",
+    "shareReport": "리포트 공유",
+    "guardrail": "이 리포트는 채용 합격 또는 불합격을 자동 결정하지 않습니다. 사람의 의사결정을 돕기 위해 검토 신호를 요약합니다.",
+    "aiOrganizes": "AI는 신호를 정리하고, 사람 리뷰어가 리포트를 확정합니다. HireSift는 채용 합격/불합격을 자동 결정하지 않습니다."
+  },
+  "actions": {
+    "noAction": "추가 확인 불필요",
+    "verificationCall": "재검증 통화 요청",
+    "portfolioWalkthrough": "포트폴리오 워크스루 요청",
+    "additionalDoc": "추가 서류 요청",
+    "manualReview": "수동 검토 필요"
+  }
+}

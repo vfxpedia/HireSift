@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saveDraft": "Save draft",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "submit": "Submit",
+    "create": "Create",
+    "send": "Send",
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search…",
+    "filter": "Filter",
+    "viewAll": "View all",
+    "viewReport": "View Report",
+    "human": "Human-reviewed",
+    "noAutoDecision": "No automatic decision",
+    "exportPdf": "Export PDF",
+    "shareReport": "Share Report",
+    "dataRetention": "Data Retention",
+    "auditLog": "Audit Log",
+    "language": "Language"
+  },
+  "attention": {
+    "low": "Low Attention",
+    "medium": "Review Recommended",
+    "high": "High Attention",
+    "manual": "Manual Review Required",
+    "additional": "Additional Check Needed"
+  },
+  "status": {
+    "pending": "Pending",
+    "in-progress": "In Progress",
+    "submitted": "Submitted",
+    "reviewed": "Reviewed",
+    "report-ready": "Report Ready"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "candidates": "Candidates",
+    "reviewer": "Reviewer",
+    "reports": "Trust Reports",
+    "settings": "Settings",
+    "auditLog": "Audit Log",
+    "checklist": "Checklist",
+    "groupOverview": "Overview",
+    "groupHiring": "Hiring",
+    "groupReports": "Reports",
+    "groupAdmin": "Admin",
+    "signOut": "Sign out",
+    "switchOrg": "Switch organization"
+  },
+  "landing": {
+    "navHowItWorks": "How it works",
+    "navTrust": "Trust & Privacy",
+    "navScope": "Scope",
+    "navPricing": "Pricing",
+    "signIn": "Sign in",
+    "requestDemo": "Request Demo",
+    "heroPill": "Human-in-the-loop · Privacy by Design",
+    "heroHeading": "Remote hiring needs a trust layer.",
+    "heroDesc": "HireSift helps teams review identity, portfolio, and interview consistency signals before making remote hiring decisions — through a structured, human-reviewed workflow.",
+    "ctaCreate": "Create Verification Request",
+    "ctaSample": "View Sample Report",
+    "ctaTryCandidate": "Try as Candidate",
+    "footerProduct": "Product",
+    "footerTrust": "Trust",
+    "footerCompany": "Company",
+    "disclaimer": "Not a lie detector. Not an auto-rejection system. A trust review tool for human decision-makers."
+  },
+  "auth": {
+    "signInTitle": "Sign in to HireSift",
+    "signInSubtitle": "Secure access for hiring teams",
+    "workEmail": "Work email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "backHome": "← Back to homepage"
+  },
+  "candidateFlow": {
+    "title": "HireSift Verification",
+    "secure": "Secure session",
+    "agreeContinue": "I agree — Continue →",
+    "step": {
+      "consent": "Consent",
+      "basicInfo": "Basic Info",
+      "portfolio": "Portfolio",
+      "document": "Document",
+      "selfie": "Selfie",
+      "voice": "Voice",
+      "review": "Review",
+      "complete": "Complete"
+    },
+    "consent": {
+      "title": "Consent & Privacy Notice",
+      "intro": "Please review and confirm your consent before submitting any information."
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "intro": "Please provide your basic contact information for verification."
+    },
+    "portfolio": {
+      "title": "Portfolio Links",
+      "intro": "Share links to your professional profiles and work samples. At least one is required."
+    },
+    "document": {
+      "title": "Masked Document Upload",
+      "intro": "Upload a masked version of an identity document or professional certificate."
+    },
+    "selfie": {
+      "title": "Selfie Video Sample",
+      "intro": "Record a short 5–10 second video sample for session integrity review."
+    },
+    "voice": {
+      "title": "Voice Sample",
+      "intro": "Record a short 5–10 second voice sample by reading the provided phrase."
+    },
+    "review": {
+      "title": "Review Your Submission",
+      "intro": "Review your submitted materials before final submission."
+    },
+    "complete": {
+      "title": "Submission Complete",
+      "intro": "Your verification materials have been securely submitted. A human reviewer will check your signals and the hiring team will be notified."
+    }
+  },
+  "report": {
+    "title": "Candidate Trust Report",
+    "identityConsistency": "Identity Consistency",
+    "portfolioProvenance": "Portfolio Provenance",
+    "interviewSessionIntegrity": "Interview Session Integrity",
+    "mediaSampleQuality": "Media Sample Quality",
+    "manualReviewStatus": "Manual Review Status",
+    "reviewSignals": "Review Signals",
+    "recommendedAction": "Recommended Action",
+    "verificationSummary": "Verification Summary",
+    "signalMatrix": "Signal Matrix",
+    "signalOverview": "Signal Overview",
+    "attentionDistribution": "Attention Distribution",
+    "sectionCompletion": "Section Completion",
+    "evidenceCards": "Evidence Cards",
+    "reviewerNotes": "Reviewer Notes",
+    "consentNotice": "Consent & Privacy Notice",
+    "maskedDocumentUpload": "Masked Document Upload",
+    "voiceSample": "Voice Sample",
+    "selfieVideo": "Selfie Video",
+    "exportPdf": "Export PDF",
+    "shareReport": "Share Report",
+    "guardrail": "This report does not determine hiring eligibility. It summarizes review signals for human decision-makers.",
+    "aiOrganizes": "AI organizes signals. Human reviewer confirms the report. No automatic hiring decision is made by HireSift."
+  },
+  "actions": {
+    "noAction": "No additional check needed",
+    "verificationCall": "Request re-verification call",
+    "portfolioWalkthrough": "Request portfolio walkthrough",
+    "additionalDoc": "Request additional document",
+    "manualReview": "Manual review required"
+  }
+}

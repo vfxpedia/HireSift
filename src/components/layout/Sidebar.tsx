@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   Shield,
   BarChart2,
@@ -20,19 +21,25 @@ import { ORGANIZATIONS, getCurrentOrgId, setCurrentOrgId } from "../../lib/orgCo
 import { toast } from "../primitives/Toaster";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: BarChart2, to: "/app/dashboard", group: "Overview" },
-  { label: "Candidates", icon: Users, to: "/app/candidates", group: "Hiring" },
-  { label: "Reviewer", icon: ClipboardCheck, to: "/app/reviewer", group: "Hiring" },
-  { label: "Trust Reports", icon: FileText, to: "/app/reports", group: "Reports" },
-  { label: "Settings", icon: Settings, to: "/app/settings", group: "Admin" },
-  { label: "Audit Log", icon: BookOpen, to: "/app/audit-log", group: "Admin" },
-  { label: "Checklist", icon: ListChecks, to: "/app/checklist", group: "Admin" },
-];
+  { tKey: "dashboard", icon: BarChart2, to: "/app/dashboard", group: "Overview" },
+  { tKey: "candidates", icon: Users, to: "/app/candidates", group: "Hiring" },
+  { tKey: "reviewer", icon: ClipboardCheck, to: "/app/reviewer", group: "Hiring" },
+  { tKey: "reports", icon: FileText, to: "/app/reports", group: "Reports" },
+  { tKey: "settings", icon: Settings, to: "/app/settings", group: "Admin" },
+  { tKey: "auditLog", icon: BookOpen, to: "/app/audit-log", group: "Admin" },
+  { tKey: "checklist", icon: ListChecks, to: "/app/checklist", group: "Admin" },
+] as const;
 
-const GROUPS = ["Overview", "Hiring", "Reports", "Admin"];
+const GROUPS = [
+  { key: "Overview", tKey: "groupOverview" },
+  { key: "Hiring", tKey: "groupHiring" },
+  { key: "Reports", tKey: "groupReports" },
+  { key: "Admin", tKey: "groupAdmin" },
+] as const;
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [currentId, setCurrentId] = useState(getCurrentOrgId());
   const current = ORGANIZATIONS.find((o) => o.id === currentId) ?? ORGANIZATIONS[0];
 
@@ -73,7 +80,7 @@ export function Sidebar() {
         >
           <div className="min-w-56">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-              Switch organization
+              {t("nav.switchOrg")}
             </p>
             <div className="space-y-1">
               {ORGANIZATIONS.map((o) => (
@@ -100,11 +107,11 @@ export function Sidebar() {
 
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         {GROUPS.map((group) => {
-          const items = NAV_ITEMS.filter((i) => i.group === group);
+          const items = NAV_ITEMS.filter((i) => i.group === group.key);
           return (
-            <div key={group} className="mb-5">
+            <div key={group.key} className="mb-5">
               <p className="text-white/30 text-[10px] font-semibold uppercase tracking-widest px-2 mb-1.5">
-                {group}
+                {t(`nav.${group.tKey}`)}
               </p>
               {items.map((item) => (
                 <NavLink
@@ -120,7 +127,7 @@ export function Sidebar() {
                   }
                 >
                   <item.icon className="w-4 h-4" />
-                  {item.label}
+                  {t(`nav.${item.tKey}`)}
                 </NavLink>
               ))}
             </div>
@@ -143,7 +150,7 @@ export function Sidebar() {
           className="w-full flex items-center gap-2 px-3 py-2 text-white/40 hover:text-white/70 text-xs rounded-lg hover:bg-white/5 transition-colors"
         >
           <LogOut className="w-3.5 h-3.5" />
-          Sign out
+          {t("nav.signOut")}
         </button>
       </div>
     </aside>

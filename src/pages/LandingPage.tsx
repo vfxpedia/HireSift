@@ -23,6 +23,8 @@ import { AttentionBadge } from "../components/primitives/Badges";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
 import { InfoModal } from "../components/modals/InfoModal";
 import { POLICIES } from "../lib/policies";
+import { LanguageToggle } from "../components/primitives/LanguageToggle";
+import { useTranslation } from "react-i18next";
 
 const FEATURES = [
   { icon: User, title: "Identity Consistency Review", desc: "Organize submitted identity signals for structured human review." },
@@ -82,6 +84,7 @@ const SCOPE = {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [policy, setPolicy] = useState<keyof typeof POLICIES | null>(null);
   const policyDoc = policy ? POLICIES[policy] : null;
 
@@ -96,14 +99,15 @@ export default function LandingPage() {
             <span className="font-semibold text-[#172033] text-sm">HireSift</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-[#6B7280]">
-            <a href="#how-it-works" className="hover:text-[#172033] transition-colors">How it works</a>
-            <a href="#trust" className="hover:text-[#172033] transition-colors">Trust & Privacy</a>
-            <a href="#scope" className="hover:text-[#172033] transition-colors">Scope</a>
-            <a href="#pricing" className="hover:text-[#172033] transition-colors">Pricing</a>
+            <a href="#how-it-works" className="hover:text-[#172033] transition-colors">{t("landing.navHowItWorks")}</a>
+            <a href="#trust" className="hover:text-[#172033] transition-colors">{t("landing.navTrust")}</a>
+            <a href="#scope" className="hover:text-[#172033] transition-colors">{t("landing.navScope")}</a>
+            <a href="#pricing" className="hover:text-[#172033] transition-colors">{t("landing.navPricing")}</a>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/login")} className="text-sm text-[#374151] hover:text-[#172033] transition-colors">Sign in</button>
-            <PrimaryBtn onClick={() => navigate("/login")} className="text-sm py-2">Request Demo</PrimaryBtn>
+            <LanguageToggle />
+            <button onClick={() => navigate("/login")} className="text-sm text-[#374151] hover:text-[#172033] transition-colors">{t("landing.signIn")}</button>
+            <PrimaryBtn onClick={() => navigate("/login")} className="text-sm py-2">{t("landing.requestDemo")}</PrimaryBtn>
           </div>
         </div>
       </nav>
@@ -117,24 +121,23 @@ export default function LandingPage() {
                 Human-in-the-loop · Privacy by Design
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-[#172033] leading-tight mb-5">
-                Remote hiring needs a trust layer.
+                {t("landing.heroHeading")}
               </h1>
               <p className="text-[#6B7280] text-lg leading-relaxed mb-8">
-                HireSift helps teams review identity, portfolio, and interview consistency signals
-                before making remote hiring decisions — through a structured, human-reviewed workflow.
+                {t("landing.heroDesc")}
               </p>
               <div className="flex flex-wrap gap-3 mb-8">
                 <PrimaryBtn onClick={() => navigate("/login")} className="text-sm" icon={<ArrowRight className="w-4 h-4" />}>
-                  Create Verification Request
+                  {t("landing.ctaCreate")}
                 </PrimaryBtn>
                 <SecondaryBtn onClick={() => navigate("/app/reports")} className="text-sm" icon={<Eye className="w-4 h-4" />}>
-                  View Sample Report
+                  {t("landing.ctaSample")}
                 </SecondaryBtn>
                 <SecondaryBtn onClick={() => navigate("/verify")} className="text-sm" icon={<User className="w-4 h-4" />}>
-                  Try as Candidate
+                  {t("landing.ctaTryCandidate")}
                 </SecondaryBtn>
               </div>
-              <p className="text-xs text-[#9CA3AF]">Not a lie detector. Not an auto-rejection system. A trust review tool for human decision-makers.</p>
+              <p className="text-xs text-[#9CA3AF]">{t("landing.disclaimer")}</p>
             </div>
             <div className="relative">
               <Card className="p-5 shadow-xl shadow-[#172033]/8">
@@ -399,7 +402,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-8 text-sm text-white/50 mb-8">
             <div>
-              <p className="text-white/80 font-medium mb-3">Product</p>
+              <p className="text-white/80 font-medium mb-3">{t("landing.footerProduct")}</p>
               <div className="space-y-2 flex flex-col items-start">
                 <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
                 <button
@@ -413,7 +416,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <p className="text-white/80 font-medium mb-3">Trust</p>
+              <p className="text-white/80 font-medium mb-3">{t("landing.footerTrust")}</p>
               <div className="space-y-2 flex flex-col items-start">
                 {(["privacy", "retention", "guardrails"] as const).map((k) => (
                   <button
@@ -428,7 +431,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <p className="text-white/80 font-medium mb-3">Company</p>
+              <p className="text-white/80 font-medium mb-3">{t("landing.footerCompany")}</p>
               <div className="space-y-2 flex flex-col items-start">
                 {(["about", "contact"] as const).map((k) => (
                   <button

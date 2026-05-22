@@ -1,6 +1,7 @@
 import React from "react";
 import { Bell, FileText, ClipboardCheck, Users, Mail, Share2, Lock } from "lucide-react";
 import { Popover } from "../primitives/Popover";
+import { LanguageToggle } from "../primitives/LanguageToggle";
 import { listAudit } from "../../api/audit";
 import type { AuditType } from "../../types";
 
@@ -41,6 +42,7 @@ export function TopBar({
       </div>
       <div className="flex items-center gap-3">
         {actions}
+        <LanguageToggle />
         <Popover
           trigger={
             <button
