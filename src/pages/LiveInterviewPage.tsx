@@ -1,0 +1,427 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import {
+  Mic,
+  MicOff,
+  Video as VideoIcon,
+  VideoOff,
+  Maximize2,
+  Camera as CameraIcon,
+  PhoneOff,
+  Shield,
+} from "lucide-react";
+import { TopBar } from "../components/layout/TopBar";
+import { Card, SectionLabel } from "../components/primitives/Card";
+import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
+import { AttentionBadge } from "../components/primitives/Badges";
+import { SignalGauge } from "../components/live/SignalGauge";
+import { FaceMeshOverlay } from "../components/live/FaceMeshOverlay";
+import { EventTimeline } from "../components/live/EventTimeline";
+import { SessionMetadataPanel } from "../components/live/SessionMetadataPanel";
+import { SourceToggle, type LiveSource } from "../components/live/SourceToggle";
+import { BaselineCompare } from "../components/live/BaselineCompare";
+import { listCandidates, getCandidate } from "../api/candidates";
+import { getReview, setNotes } from "../api/reviews";
+import { addAudit } from "../api/audit";
+import { toast } from "../components/primitives/Toaster";
+import { useLiveSignals } from "../hooks/useLiveSignals";
+import { useMediaRecorder } from "../hooks/useMediaRecorder";
+import { cn } from "../lib/cn";
+
+const DEMO_VIDEO = "/demo/interview.mp4";
+const BASELINE_IMG = "/demo/baseline.jpg";
+
+function formatTimer(ms: number) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const mm = Math.floor(s / 60).toString().padStart(2, "0");
+  const ss = (s % 60).toString().padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
+export default function LiveInterviewPage() {
+  const navigate = useNavigate();
+  const { candidateId } = useParams<{ candidateId?: string }>();
+  const candidates = listCandidates();
+
+  // Pick a sensible default candidate
+  const targetId = useMemo(() => {
+    if (candidateId) return candidateId;
+    return (
+      candidates.find((c) => c.submissionStatus === "submitted")?.id ??
+      candidates.find((c) => c.submissionStatus === "in-progress")?.id ??
+      candidates[0]?.id
+    );
+  }, [candidateId, candidates]);
+  const candidate = targetId ? getCandidate(targetId) : undefined;
+  const review = candidate ? getReview(candidate.id) : undefined;
+
+  const [source, setSource] = useState<LiveSource>("demo");
+  const [micOn, setMicOn] = useState(true);
+  const [camOn, setCamOn] = useState(true);
+  const [tick, setTick] = useState(0); // 1Hz clock for elapsed timer
+  const [videoTime, setVideoTime] = useState(0);
+  const [note, setNote] = useState(review?.notes ?? "");
+  const sessionStartRef = useRef<number>(Date.now());
+  const auditedStartRef = useRef(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Live camera plumbing — only opens stream when source === "live"
+  const { previewStream, permissionError, start, stop } = useMediaRecorder({
+    kind: "video",
+    maxDurationSec: 60 * 30, // never auto-stop in this context; we drive manually
+  });
+
+  // Reset session timer when (re)entering or switching candidate
+  useEffect(() => {
+    sessionStartRef.current = Date.now();
+    auditedStartRef.current = false;
+    setVideoTime(0);
+  }, [targetId, source]);
+
+  // 1Hz timer
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((t) => t + 1), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Audit "session started" once per candidate/source combo
+  useEffect(() => {
+    if (!candidate || auditedStartRef.current) return;
+    auditedStartRef.current = true;
+    addAudit({
+      action: source === "live" ? "Live camera session started" : "Demo interview session started",
+      user: candidate.reviewer ?? "Reviewer",
+      candidate: candidate.code,
+      type: "review",
+    });
+  }, [candidate, source]);
+
+  // Manage live camera stream
+  useEffect(() => {
+    if (source !== "live") {
+      stop();
+      return;
+    }
+    start();
+    return () => stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
+
+  // Wire the stream into the <video> element for live mode
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (source === "live") {
+      if (previewStream) {
+        el.srcObject = previewStream;
+        el.muted = true;
+        el.play().catch(() => {});
+      }
+    } else {
+      el.srcObject = null;
+      el.src = DEMO_VIDEO;
+      el.muted = !micOn ? true : true; // demo always silent for kiosk-friendly playback
+      el.load();
+      el.play().catch(() => {});
+    }
+  }, [source, previewStream, micOn]);
+
+  // Track demo video currentTime so signals can react to scripted moments
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || source !== "demo") return;
+    const onTime = () => setVideoTime(el.currentTime);
+    const onEnded = () => setVideoTime(0);
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("ended", onEnded);
+    return () => {
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("ended", onEnded);
+    };
+  }, [source]);
+
+  const signals = useLiveSignals({
+    active: !!candidate,
+    videoTime,
+    liveMode: source === "live",
+  });
+
+  void tick; // re-render trigger so the elapsed clock updates
+
+  if (!candidate) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <TopBar title="Live Interview" subtitle="No candidates yet" />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <Card className="p-8 text-center max-w-sm">
+            <p className="text-sm text-[#6B7280] mb-4">
+              Create a verification request to start reviewing candidates live.
+            </p>
+            <PrimaryBtn onClick={() => navigate("/app/candidates")}>Go to Candidates</PrimaryBtn>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const elapsedMs = Date.now() - sessionStartRef.current;
+  const similarity = signals.faceConsistency.value;
+
+  const onSaveNotes = () => {
+    setNotes(candidate.id, note);
+    toast.success("Reviewer notes saved");
+  };
+
+  const onEndSession = () => {
+    addAudit({
+      action: "Live interview session ended",
+      user: candidate.reviewer ?? "Reviewer",
+      candidate: candidate.code,
+      type: "review",
+    });
+    toast.success("Session ended — continuing to reviewer console");
+    navigate(`/app/reviewer/${candidate.id}`);
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <TopBar
+        title="Live Interview"
+        subtitle={`${candidate.name} · ${candidate.code} · ${formatTimer(elapsedMs)}`}
+        actions={
+          <div className="flex items-center gap-2">
+            <SourceToggle value={source} onChange={setSource} />
+            <SecondaryBtn onClick={onSaveNotes} className="text-sm py-2">
+              Save notes
+            </SecondaryBtn>
+            <PrimaryBtn
+              onClick={onEndSession}
+              className="text-sm py-2"
+              icon={<PhoneOff className="w-4 h-4" />}
+            >
+              End Session
+            </PrimaryBtn>
+          </div>
+        }
+      />
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-6xl mx-auto mb-4 flex items-center gap-2 bg-[#172033]/5 border border-[#172033]/10 rounded-xl px-4 py-2.5 text-xs text-[#374151]">
+          <Shield className="w-3.5 h-3.5 text-[#172033]" />
+          <span>
+            <strong className="font-semibold text-[#172033]">
+              AI organizes signals. Human reviewer confirms the report.
+            </strong>{" "}
+            Live signals are observation aids, not verdicts.
+          </span>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-5">
+          {/* LEFT — Video + overlays + controls */}
+          <div className="lg:col-span-2 space-y-4">
+            <Card className="overflow-hidden">
+              <div className="relative bg-black aspect-video">
+                <video
+                  ref={videoRef}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  autoPlay
+                  loop={source === "demo"}
+                  muted
+                  playsInline
+                />
+                <FaceMeshOverlay
+                  active={!!candidate}
+                  intensity={signals.faceConsistency.status === "low" ? 0.4 : 0.8}
+                />
+
+                {/* Status pill — top-left */}
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white text-[11px] font-medium">
+                    <span className="w-2 h-2 rounded-full bg-[#C6923A] animate-pulse" />
+                    {source === "live" ? "LIVE" : "DEMO"}
+                  </div>
+                  <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white text-[11px] font-mono">
+                    {formatTimer(elapsedMs)}
+                  </div>
+                </div>
+
+                {/* Attention badge — top-right */}
+                <div className="absolute top-3 right-3">
+                  <AttentionBadge level={signals.faceConsistency.status} />
+                </div>
+
+                {/* Guardrail chip — bottom-left */}
+                <div className="absolute bottom-3 left-3 max-w-[60%] px-3 py-2 rounded-lg bg-black/55 backdrop-blur text-white/90 text-[11px] leading-snug">
+                  AI organizes signals. Human reviewer confirms the report.
+                </div>
+
+                {/* Permission error */}
+                {source === "live" && permissionError && (
+                  <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 mx-auto px-4 py-3 rounded-xl bg-[#C6923A]/95 text-white text-xs text-center leading-relaxed">
+                    {permissionError}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom controls */}
+              <div className="px-4 py-3 border-t border-[#E5E7EB] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ControlButton
+                    active={micOn}
+                    onClick={() => setMicOn((v) => !v)}
+                    disabled={source !== "live"}
+                    title={micOn ? "Mute microphone" : "Unmute microphone"}
+                  >
+                    {micOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                  </ControlButton>
+                  <ControlButton
+                    active={camOn}
+                    onClick={() => setCamOn((v) => !v)}
+                    disabled={source !== "live"}
+                    title={camOn ? "Stop camera" : "Start camera"}
+                  >
+                    {camOn ? <VideoIcon className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                  </ControlButton>
+                  <ControlButton
+                    onClick={() => videoRef.current?.requestFullscreen?.()}
+                    title="Fullscreen"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </ControlButton>
+                </div>
+                <div className="text-[11px] text-[#9CA3AF]">
+                  {source === "demo"
+                    ? "Demo playback loops for presentation purposes."
+                    : "Live camera mode — your device feed is used only for this session."}
+                </div>
+              </div>
+            </Card>
+
+            {/* Signal gauges in 2x2 */}
+            <Card className="p-4">
+              <SectionLabel>Live Signals</SectionLabel>
+              <div className="grid grid-cols-2 gap-3 -mt-1">
+                <SignalGauge
+                  label="Liveness"
+                  value={signals.liveness.value}
+                  status={signals.liveness.status}
+                  hint="Eye blink + micro-motion plausibility"
+                />
+                <SignalGauge
+                  label="Face consistency"
+                  value={signals.faceConsistency.value}
+                  status={signals.faceConsistency.status}
+                  hint="vs. baseline reference"
+                />
+                <SignalGauge
+                  label="Voice consistency"
+                  value={signals.voiceConsistency.value}
+                  status={signals.voiceConsistency.status}
+                  hint="vs. submitted voice sample"
+                />
+                <SignalGauge
+                  label="Session integrity"
+                  value={signals.sessionIntegrity.value}
+                  status={signals.sessionIntegrity.status}
+                  hint="Device + network signal stability"
+                />
+              </div>
+            </Card>
+          </div>
+
+          {/* RIGHT — Side panels */}
+          <div className="space-y-4">
+            <Card className="p-4">
+              <SectionLabel>Recent events</SectionLabel>
+              <EventTimeline events={signals.events} />
+            </Card>
+
+            <Card className="p-4">
+              <SectionLabel>Reviewer notes</SectionLabel>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Capture observations during the live session…"
+                rows={5}
+                className="w-full text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30 resize-none"
+              />
+              <SecondaryBtn onClick={onSaveNotes} className="text-xs py-1.5 mt-2 w-full justify-center">
+                Save notes
+              </SecondaryBtn>
+            </Card>
+
+            <Card className="p-4">
+              <SectionLabel>Baseline comparison</SectionLabel>
+              <BaselineCompare
+                videoEl={videoRef.current}
+                baselineSrc={BASELINE_IMG}
+                similarity={similarity}
+              />
+            </Card>
+
+            <Card className="p-4">
+              <SectionLabel>Session metadata</SectionLabel>
+              <SessionMetadataPanel
+                latencyMs={42 + Math.sin(tick / 3) * 6}
+                frameRate={24 + Math.sin(tick / 5) * 1.2}
+              />
+            </Card>
+
+            <Card className="p-4">
+              <SectionLabel>Next steps</SectionLabel>
+              <div className="space-y-2">
+                <SecondaryBtn
+                  onClick={() => navigate(`/app/candidates/${candidate.id}`)}
+                  className="w-full justify-center text-sm"
+                  icon={<CameraIcon className="w-4 h-4" />}
+                >
+                  Open Candidate Detail
+                </SecondaryBtn>
+                <PrimaryBtn
+                  onClick={() => navigate(`/app/reviewer/${candidate.id}`)}
+                  className="w-full justify-center text-sm"
+                >
+                  Continue to Reviewer Console
+                </PrimaryBtn>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ControlButton({
+  children,
+  onClick,
+  active = true,
+  disabled,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  active?: boolean;
+  disabled?: boolean;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={cn(
+        "w-10 h-10 rounded-xl flex items-center justify-center transition-colors border",
+        disabled
+          ? "border-[#E5E7EB] text-[#D1D5DB] bg-[#F9FAFB] cursor-not-allowed"
+          : active
+          ? "border-[#E5E7EB] text-[#172033] bg-white hover:bg-[#F7F8FA]"
+          : "border-[#C6923A]/40 text-[#8A6422] bg-[#C6923A]/10",
+      )}
+    >
+      {children}
+    </button>
+  );
+}

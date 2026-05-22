@@ -12,6 +12,7 @@ import AuditLogPage from "../pages/AuditLogPage";
 import CandidateFlowPage from "../pages/CandidateFlowPage";
 import CandidateDetailPage from "../pages/CandidateDetailPage";
 import ChecklistPage from "../pages/ChecklistPage";
+import LiveInterviewPage from "../pages/LiveInterviewPage";
 
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="candidates" element={<CandidatesPage />} />
           <Route path="candidates/:candidateId" element={<CandidateDetailPage />} />
+          <Route path="live-interview" element={<LiveInterviewPage />} />
+          <Route path="live-interview/:candidateId" element={<LiveInterviewPage />} />
           <Route path="reviewer" element={<ReviewerPage />} />
           <Route path="reviewer/:candidateId" element={<ReviewerPage />} />
           <Route path="reports" element={<TrustReportPage />} />

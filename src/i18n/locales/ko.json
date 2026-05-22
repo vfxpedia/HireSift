@@ -55,6 +55,7 @@
   "nav": {
     "dashboard": "대시보드",
     "candidates": "후보자",
+    "liveInterview": "라이브 면접",
     "reviewer": "리뷰어",
     "reports": "신뢰 리포트",
     "settings": "설정",

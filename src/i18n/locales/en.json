@@ -55,6 +55,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "candidates": "Candidates",
+    "liveInterview": "Live Interview",
     "reviewer": "Reviewer",
     "reports": "Trust Reports",
     "settings": "Settings",

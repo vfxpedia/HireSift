@@ -14,6 +14,7 @@ import {
   LogOut,
   Check,
   ListChecks,
+  Video,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { Popover } from "../primitives/Popover";
@@ -23,6 +24,7 @@ import { toast } from "../primitives/Toaster";
 const NAV_ITEMS = [
   { tKey: "dashboard", icon: BarChart2, to: "/app/dashboard", group: "Overview" },
   { tKey: "candidates", icon: Users, to: "/app/candidates", group: "Hiring" },
+  { tKey: "liveInterview", icon: Video, to: "/app/live-interview", group: "Hiring" },
   { tKey: "reviewer", icon: ClipboardCheck, to: "/app/reviewer", group: "Hiring" },
   { tKey: "reports", icon: FileText, to: "/app/reports", group: "Reports" },
   { tKey: "settings", icon: Settings, to: "/app/settings", group: "Admin" },
