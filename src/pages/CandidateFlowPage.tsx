@@ -39,6 +39,7 @@ import {
   setStep as setStepApi,
 } from "../api/submissions";
 import type { BasicInfo, PortfolioLink, MediaAsset } from "../types";
+import { DEMO_PROFILE } from "../lib/demoProfile";
 
 const STEPS = [
   { tKey: "consent", icon: Lock },
@@ -109,10 +110,16 @@ function DemoIntroScreen() {
       .toString()
       .padStart(2, "0")}`;
     const candidate = createCandidate({
-      name: `Demo Candidate ${stamp}`,
-      email: "demo@hiresift.app",
-      role: "Demo Verification",
+      name: `${DEMO_PROFILE.name} (Demo ${stamp})`,
+      email: DEMO_PROFILE.email,
+      role: DEMO_PROFILE.role,
+      isDemo: true,
     });
+    // Pre-seed the submission so Basic Info + Portfolio default to the
+    // curated demo values. Reviewer / document / media steps still need
+    // a live click-through so the presentation feels real.
+    saveBasicInfo(candidate.id, DEMO_PROFILE.basicInfo);
+    savePortfolio(candidate.id, DEMO_PROFILE.portfolio);
     navigate(`/verify/${candidate.id}`, { replace: true });
   };
 
@@ -537,7 +544,7 @@ function PortfolioStep({
   onAdvance: () => void;
 }) {
   const { t } = useTranslation();
-  const PLATFORMS = ["GitHub", "LinkedIn", "Behance", "Personal Website"];
+  const PLATFORMS = ["GitHub", "LinkedIn", "YouTube", "Behance", "Personal Website"];
   const existing = getSubmission(candidateId).portfolio;
   const [links, setLinks] = useState<Record<string, string>>(() =>
     PLATFORMS.reduce((acc, p) => {

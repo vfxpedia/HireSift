@@ -40,6 +40,8 @@ export interface Candidate {
   dueDate?: string;
   inviteNote?: string;
   linkSent?: boolean;
+  /** Marks a candidate created by the /verify demo intro screen. */
+  isDemo?: boolean;
 }
 
 export interface PortfolioLink {

@@ -16,6 +16,7 @@ export interface CreateCandidateInput {
   verificationType?: VerificationType;
   dueDate?: string;
   inviteNote?: string;
+  isDemo?: boolean;
 }
 
 export function listCandidates(): Candidate[] {
@@ -49,6 +50,7 @@ export function createCandidate(input: CreateCandidateInput): Candidate {
     dueDate: input.dueDate,
     inviteNote: input.inviteNote,
     linkSent: false,
+    isDemo: input.isDemo,
   };
   db.setCandidates([c, ...list]);
   addAudit({
