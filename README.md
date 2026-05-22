@@ -82,6 +82,21 @@ src/
 - EN/KR 토글은 아직 미구현 (다음 단계).
 - 백엔드/AI 모듈은 mock. 신호 분류는 단순 규칙 기반.
 
+## 배포 (Vercel)
+
+`vercel.json` 이 SPA rewrite + Vite framework preset 을 명시해 두었습니다.
+
+1. https://vercel.com 에 GitHub 계정으로 로그인
+2. **Add New → Project** → `vfxpedia/HireSift` 선택 후 Import
+3. 모든 기본 설정 유지 (Framework: Vite, Build: `npm run build`, Output: `dist`) → Deploy
+4. 빌드 완료 후 `*.vercel.app` URL 이 발급되며 발표/공유 가능
+
+`main` 브랜치에 push 할 때마다 자동 재배포됩니다. PR 별 Preview URL 도 자동 생성됩니다.
+
+## 디자인/리서치 문서
+
+`docs/` 폴더에 HireSift 의 제품 정의·디자인 가이드·리서치 보고서가 함께 들어 있습니다. 자세한 인덱스는 `docs/README.md` 참고.
+
 ## 다음 단계
 
 - EN/KR i18n 토글 (`react-i18next`) — audit 문서가 지정한 라벨 매핑 적용.
