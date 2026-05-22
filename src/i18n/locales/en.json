@@ -383,6 +383,8 @@
     "pillLive": "LIVE",
     "faceTracking": "Face tracking · {{percent}}%",
     "faceModelLoading": "Loading face model…",
+    "faceSearching": "Searching for face…",
+    "faceModelError": "Face model unavailable — fallback mesh active",
     "guardrailChip": "AI organizes signals. Human reviewer confirms the report.",
     "controls": {
       "muteDemo": "Mute video sound",
@@ -654,6 +656,85 @@
       "portfolio": "Portfolio account activity reviewed.",
       "session": "Session media quality is consistent and clear.",
       "mediaQuality": "Selfie and voice samples meet quality threshold."
+    },
+    "tableData": {
+      "area": {
+        "basicIdentity": "Basic identity",
+        "portfolioAccounts": "Portfolio accounts",
+        "maskedDocument": "Masked document",
+        "selfieSample": "Selfie sample",
+        "voiceSample": "Voice sample",
+        "publicProfile": "Public profile",
+        "reviewer": "Reviewer"
+      },
+      "signal": {
+        "nameConsistency": "Name consistency",
+        "submittedPortfolioLinks": "Submitted portfolio links",
+        "accountAgeGithub": "Account age — GitHub",
+        "documentVisible": "Document type visible",
+        "faceConsistency": "Face consistency",
+        "voiceConsistency": "Voice consistency",
+        "digitalFootprint": "Digital footprint",
+        "manualReviewNotes": "Manual review notes"
+      },
+      "evidence": {
+        "submittedAs": "Submitted as {{name}}",
+        "basicInfoMissing": "Basic information not yet provided",
+        "matchesAllFields": "Matches across all submitted fields",
+        "linksProvided_one": "{{count}} link provided",
+        "linksProvided_other": "{{count}} links provided",
+        "linksSubmitted_one": "{{count}} link submitted",
+        "linksSubmitted_other": "{{count}} links submitted",
+        "noPortfolio": "No portfolio link submitted",
+        "monthsOld": "{{count}} months old",
+        "yearsOld_one": "{{count}} year",
+        "yearsOld_other": "{{count}} years",
+        "professionalCertificateMasked": "Professional certificate (masked)",
+        "documentMaskedUploaded": "Masked document uploaded",
+        "documentMissing": "Document not uploaded",
+        "recordedSec": "Recorded · {{seconds}} sec",
+        "selfieMissing": "Selfie video not recorded",
+        "voiceMissing": "Voice sample not recorded",
+        "clearStableConsistent": "Clear, stable, consistent",
+        "clearAudioNoAnomalies": "Clear audio, no anomalies",
+        "linkedinYearsActive": "LinkedIn {{years}} years, active",
+        "reviewedBy": "Reviewed by {{name}}",
+        "pendingReviewer": "Pending reviewer",
+        "seeReviewerNotes": "See reviewer notes",
+        "reviewerToVerify": "Reviewer to verify"
+      },
+      "note": {
+        "shortForSenior": "Short for claimed senior experience",
+        "fewerLinksThanExpected": "Fewer portfolio links than expected",
+        "portfolioWalkthroughRecommended": "Portfolio walkthrough recommended",
+        "ageShorterThanClaimed": "Account age shorter than claimed experience"
+      },
+      "portfolio": {
+        "platform": {
+          "github": "GitHub",
+          "linkedin": "LinkedIn",
+          "personalWebsite": "Personal Website",
+          "behance": "Behance",
+          "notion": "Notion"
+        },
+        "age": {
+          "months_one": "{{count}} month",
+          "months_other": "{{count}} months",
+          "years_one": "{{count}} year",
+          "years_other": "{{count}} years",
+          "unknown": "—",
+          "reviewerToVerify": "Reviewer to verify"
+        },
+        "activity": {
+          "commits_one": "{{count}} commit",
+          "commits_other": "{{count}} commits",
+          "connectionsPlus": "{{count}}+ connections",
+          "portfolioProjects": "Portfolio projects",
+          "notProvided": "Not provided",
+          "reviewerToVerify": "Reviewer to verify",
+          "active": "Active"
+        }
+      }
     }
   },
   "actions": {

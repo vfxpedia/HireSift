@@ -30,6 +30,15 @@ import { useEffect, useState } from "react";
 import { ExportPdfModal, type ExportOptions } from "../components/modals/ExportPdfModal";
 import { ShareReportModal } from "../components/modals/ShareReportModal";
 import { useTranslation } from "react-i18next";
+import {
+  localizeArea,
+  localizeSignal,
+  localizeEvidence,
+  localizeNote,
+  localizePlatform,
+  localizeAge,
+  localizeActivity,
+} from "../lib/reportLocalize";
 import type { AttentionLevel, SignalRow, RecommendedAction } from "../types";
 
 function actionTKey(a: RecommendedAction): string {
@@ -333,14 +342,14 @@ export default function TrustReportPage() {
                 <tbody>
                   {report.signalMatrix.map((row, i) => (
                     <tr key={i} className="border-b border-[#E5E7EB] last:border-0">
-                      <td className="px-4 py-3 text-xs font-medium text-[#374151]">{row.area}</td>
-                      <td className="px-4 py-3 text-xs text-[#6B7280]">{row.signal}</td>
+                      <td className="px-4 py-3 text-xs font-medium text-[#374151]">{localizeArea(row.area, t)}</td>
+                      <td className="px-4 py-3 text-xs text-[#6B7280]">{localizeSignal(row.signal, t)}</td>
                       <td className="px-4 py-3">
                         <AttentionBadge level={row.status} />
                       </td>
-                      <td className="px-4 py-3 text-xs text-[#6B7280]">{row.evidence}</td>
+                      <td className="px-4 py-3 text-xs text-[#6B7280]">{localizeEvidence(row.evidence, t)}</td>
                       <td className="px-4 py-3 text-xs text-[#C6923A]">
-                        {row.note || <span className="text-[#9CA3AF]">—</span>}
+                        {row.note ? localizeNote(row.note, t) : <span className="text-[#9CA3AF]">—</span>}
                       </td>
                     </tr>
                   ))}
@@ -384,10 +393,10 @@ export default function TrustReportPage() {
                         }}
                       />
                       <div className="ml-3">
-                        <p className="text-xs font-semibold text-[#374151]">{p.platform}</p>
+                        <p className="text-xs font-semibold text-[#374151]">{localizePlatform(p.platform, t)}</p>
                         <p className="text-[11px] text-[#9CA3AF] font-mono">{p.url}</p>
                         <p className="text-[10px] text-[#6B7280] mt-0.5">
-                          {t("report.fieldAccountAge")}: <strong className="text-[#374151]">{p.age}</strong> · {p.activity}
+                          {t("report.fieldAccountAge")}: <strong className="text-[#374151]">{localizeAge(p.age, t)}</strong> · {localizeActivity(p.activity, t)}
                         </p>
                       </div>
                     </div>
@@ -404,7 +413,7 @@ export default function TrustReportPage() {
                         <Globe className="w-4 h-4 text-[#6B7280]" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#374151]">{p.platform}</p>
+                        <p className="text-sm font-medium text-[#374151]">{localizePlatform(p.platform, t)}</p>
                         <p className="text-xs text-[#9CA3AF] font-mono">{p.url}</p>
                       </div>
                     </div>
@@ -413,16 +422,20 @@ export default function TrustReportPage() {
                   <div className="mt-3 grid grid-cols-3 gap-3">
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
                       <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldAccountAge")}</p>
-                      <p className="text-xs font-medium text-[#374151]">{p.age}</p>
+                      <p className="text-xs font-medium text-[#374151]">{localizeAge(p.age, t)}</p>
                     </div>
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
                       <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldActivity")}</p>
-                      <p className="text-xs font-medium text-[#374151]">{p.activity}</p>
+                      <p className="text-xs font-medium text-[#374151]">{localizeActivity(p.activity, t)}</p>
                     </div>
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
                       <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldReviewerNote")}</p>
                       <p className="text-xs text-[#C6923A]">
-                        {p.note || <span className="text-[#9CA3AF]">{t("report.fieldNoteEmpty")}</span>}
+                        {p.note ? (
+                          localizeNote(p.note, t)
+                        ) : (
+                          <span className="text-[#9CA3AF]">{t("report.fieldNoteEmpty")}</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -621,15 +634,15 @@ function EvidenceCard({
     <Card className="p-4 hover:border-[#172033]/20 transition-colors">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">{row.area}</p>
-          <p className="text-sm font-semibold text-[#111827] truncate">{row.signal}</p>
+          <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">{localizeArea(row.area, t)}</p>
+          <p className="text-sm font-semibold text-[#111827] truncate">{localizeSignal(row.signal, t)}</p>
         </div>
         <AttentionBadge level={row.status} />
       </div>
-      <p className="text-xs text-[#374151] leading-relaxed">{row.evidence}</p>
+      <p className="text-xs text-[#374151] leading-relaxed">{localizeEvidence(row.evidence, t)}</p>
       {row.note && (
         <div className="mt-2 px-3 py-2 bg-[#C6923A]/5 border border-[#C6923A]/20 rounded-lg">
-          <p className="text-[11px] text-[#8A6422] leading-relaxed">{row.note}</p>
+          <p className="text-[11px] text-[#8A6422] leading-relaxed">{localizeNote(row.note, t)}</p>
         </div>
       )}
       <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[10px] text-[#9CA3AF]">

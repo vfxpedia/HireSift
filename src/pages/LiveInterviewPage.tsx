@@ -74,11 +74,12 @@ export default function LiveInterviewPage() {
 
   // Real face tracking via face-api.js (lazy-loaded). Falls back to the
   // static mesh when the model is still loading or no face is detected.
-  const { landmarks, confidence, ready: faceReady } = useFaceTracking({
-    videoRef,
-    active: !!candidate,
-    intervalMs: 120,
-  });
+  const { landmarks, confidence, ready: faceReady, error: faceError } =
+    useFaceTracking({
+      videoRef,
+      active: !!candidate,
+      intervalMs: 120,
+    });
 
   // Live camera plumbing — only opens stream when source === "live"
   const { previewStream, permissionError, start, stop } = useMediaRecorder({
@@ -276,9 +277,22 @@ export default function LiveInterviewPage() {
                       {t("liveInterview.faceTracking", { percent: Math.round(confidence * 100) })}
                     </div>
                   )}
-                  {!faceReady && !landmarks && (
+                  {!landmarks && !faceReady && !faceError && (
                     <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white/70 text-[10px] font-medium">
                       {t("liveInterview.faceModelLoading")}
+                    </div>
+                  )}
+                  {!landmarks && faceReady && !faceError && (
+                    <div className="px-2.5 py-1 rounded-md bg-[#C6923A]/80 backdrop-blur text-white text-[10px] font-medium">
+                      {t("liveInterview.faceSearching")}
+                    </div>
+                  )}
+                  {faceError && (
+                    <div
+                      className="px-2.5 py-1 rounded-md bg-[#7f1d1d]/80 backdrop-blur text-white text-[10px] font-medium max-w-[260px] truncate"
+                      title={faceError}
+                    >
+                      {t("liveInterview.faceModelError")}
                     </div>
                   )}
                 </div>

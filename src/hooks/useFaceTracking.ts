@@ -62,8 +62,8 @@ export function useFaceTracking({ videoRef, active, intervalMs = 120 }: Options)
       }
 
       const options = new faceapi.TinyFaceDetectorOptions({
-        inputSize: 224,
-        scoreThreshold: 0.4,
+        inputSize: 416, // 224 was too small to detect mid-distance faces
+        scoreThreshold: 0.3,
       });
 
       const tick = async () => {
@@ -92,6 +92,7 @@ export function useFaceTracking({ videoRef, active, intervalMs = 120 }: Options)
             }
           } catch (err) {
             console.warn("[useFaceTracking] detect error:", err);
+            setError((err as Error).message);
           }
         }
         timer = window.setTimeout(tick, intervalMs);

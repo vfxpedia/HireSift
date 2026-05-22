@@ -383,6 +383,8 @@
     "pillLive": "라이브",
     "faceTracking": "얼굴 추적 · {{percent}}%",
     "faceModelLoading": "얼굴 모델 로딩 중…",
+    "faceSearching": "얼굴 탐색 중…",
+    "faceModelError": "얼굴 모델 사용 불가 — 대체 메쉬 동작 중",
     "guardrailChip": "AI는 신호를 정리하고, 사람 리뷰어가 리포트를 확정합니다.",
     "controls": {
       "muteDemo": "동영상 소리 음소거",
@@ -654,6 +656,85 @@
       "portfolio": "포트폴리오 계정 활동을 검토했습니다.",
       "session": "세션 미디어 품질이 일관되고 선명합니다.",
       "mediaQuality": "셀피와 음성 샘플이 품질 기준을 충족합니다."
+    },
+    "tableData": {
+      "area": {
+        "basicIdentity": "기본 신원",
+        "portfolioAccounts": "포트폴리오 계정",
+        "maskedDocument": "마스킹 문서",
+        "selfieSample": "셀피 샘플",
+        "voiceSample": "음성 샘플",
+        "publicProfile": "공개 프로필",
+        "reviewer": "리뷰어"
+      },
+      "signal": {
+        "nameConsistency": "이름 일관성",
+        "submittedPortfolioLinks": "제출된 포트폴리오 링크",
+        "accountAgeGithub": "계정 연식 — GitHub",
+        "documentVisible": "문서 종류 식별 가능",
+        "faceConsistency": "얼굴 일관성",
+        "voiceConsistency": "음성 일관성",
+        "digitalFootprint": "디지털 풋프린트",
+        "manualReviewNotes": "수동 검토 노트"
+      },
+      "evidence": {
+        "submittedAs": "{{name}}(으)로 제출됨",
+        "basicInfoMissing": "기본 정보 미제출",
+        "matchesAllFields": "제출된 모든 필드 일치",
+        "linksProvided_one": "{{count}}개 링크 제공됨",
+        "linksProvided_other": "{{count}}개 링크 제공됨",
+        "linksSubmitted_one": "{{count}}개 링크 제출됨",
+        "linksSubmitted_other": "{{count}}개 링크 제출됨",
+        "noPortfolio": "제출된 포트폴리오 링크 없음",
+        "monthsOld": "{{count}}개월 경과",
+        "yearsOld_one": "{{count}}년",
+        "yearsOld_other": "{{count}}년",
+        "professionalCertificateMasked": "전문 자격증 (마스킹)",
+        "documentMaskedUploaded": "마스킹 문서 업로드됨",
+        "documentMissing": "문서 미업로드",
+        "recordedSec": "녹화 완료 · {{seconds}}초",
+        "selfieMissing": "셀피 영상 미녹화",
+        "voiceMissing": "음성 샘플 미녹음",
+        "clearStableConsistent": "선명·안정·일관됨",
+        "clearAudioNoAnomalies": "선명한 오디오, 이상 없음",
+        "linkedinYearsActive": "LinkedIn {{years}}년, 활성",
+        "reviewedBy": "{{name}} 검토 완료",
+        "pendingReviewer": "리뷰어 대기",
+        "seeReviewerNotes": "리뷰어 노트 참조",
+        "reviewerToVerify": "리뷰어 확인 필요"
+      },
+      "note": {
+        "shortForSenior": "주장된 시니어 경력 대비 짧음",
+        "fewerLinksThanExpected": "예상보다 적은 포트폴리오 링크",
+        "portfolioWalkthroughRecommended": "포트폴리오 워크스루 권장",
+        "ageShorterThanClaimed": "주장된 경력 대비 계정 연식이 짧음"
+      },
+      "portfolio": {
+        "platform": {
+          "github": "GitHub",
+          "linkedin": "LinkedIn",
+          "personalWebsite": "개인 웹사이트",
+          "behance": "Behance",
+          "notion": "Notion"
+        },
+        "age": {
+          "months_one": "{{count}}개월",
+          "months_other": "{{count}}개월",
+          "years_one": "{{count}}년",
+          "years_other": "{{count}}년",
+          "unknown": "—",
+          "reviewerToVerify": "리뷰어 확인 필요"
+        },
+        "activity": {
+          "commits_one": "{{count}}회 커밋",
+          "commits_other": "{{count}}회 커밋",
+          "connectionsPlus": "{{count}}+ 커넥션",
+          "portfolioProjects": "포트폴리오 프로젝트",
+          "notProvided": "미제출",
+          "reviewerToVerify": "리뷰어 확인 필요",
+          "active": "활성"
+        }
+      }
     }
   },
   "actions": {
