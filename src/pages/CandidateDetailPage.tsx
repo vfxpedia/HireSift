@@ -221,16 +221,28 @@ export default function CandidateDetailPage() {
                 </MediaCell>
                 <MediaCell label={t("candidateDetail.selfieVideo")} empty={t("candidateDetail.mediaEmpty")} icon={<Video className="w-4 h-4 text-[#6B7280]" />}>
                   {submission.selfie ? (
-                    <video
-                      src={submission.selfie.dataUrl}
-                      controls
-                      className="w-full h-32 object-cover rounded-lg bg-black"
-                    />
+                    submission.selfie.placeholder ? (
+                      <div className="h-32 flex items-center justify-center rounded-lg bg-[#C6923A]/10 border border-[#C6923A]/30 text-[10px] text-[#8A6422] text-center px-2">
+                        {t("candidateDetail.mediaPlaceholder", { seconds: Math.round(submission.selfie.durationSec ?? 0) })}
+                      </div>
+                    ) : (
+                      <video
+                        src={submission.selfie.dataUrl}
+                        controls
+                        className="w-full h-32 object-cover rounded-lg bg-black"
+                      />
+                    )
                   ) : null}
                 </MediaCell>
                 <MediaCell label={t("candidateDetail.voiceSample")} empty={t("candidateDetail.mediaEmpty")} icon={<Mic className="w-4 h-4 text-[#6B7280]" />}>
                   {submission.voice ? (
-                    <audio src={submission.voice.dataUrl} controls className="w-full mt-2" />
+                    submission.voice.placeholder ? (
+                      <div className="h-16 flex items-center justify-center rounded-lg bg-[#C6923A]/10 border border-[#C6923A]/30 text-[10px] text-[#8A6422] text-center px-2 mt-2">
+                        {t("candidateDetail.mediaPlaceholder", { seconds: Math.round(submission.voice.durationSec ?? 0) })}
+                      </div>
+                    ) : (
+                      <audio src={submission.voice.dataUrl} controls className="w-full mt-2" />
+                    )
                   ) : null}
                 </MediaCell>
               </div>
