@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Camera, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { SecondaryBtn } from "../primitives/Buttons";
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function BaselineCompare({ videoEl, baselineSrc, similarity }: Props) {
+  const { t } = useTranslation();
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const takeSnapshot = () => {
@@ -34,21 +36,21 @@ export function BaselineCompare({ videoEl, baselineSrc, similarity }: Props) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
-        <Cell label="Baseline">
+        <Cell label={t("liveInterview.baseline.baseline")}>
           <img src={baselineSrc} alt="baseline" className="w-full h-20 object-cover rounded-md" />
         </Cell>
-        <Cell label="Live frame">
+        <Cell label={t("liveInterview.baseline.liveFrame")}>
           {snapshot ? (
             <img src={snapshot} alt="live snapshot" className="w-full h-20 object-cover rounded-md" />
           ) : (
             <div className="w-full h-20 flex items-center justify-center rounded-md bg-[#F3F4F6] text-[10px] text-[#9CA3AF]">
-              Take snapshot
+              {t("liveInterview.baseline.snapshotEmpty")}
             </div>
           )}
         </Cell>
       </div>
       <div className="flex items-center gap-2 text-xs">
-        <span className="text-[#6B7280]">Similarity</span>
+        <span className="text-[#6B7280]">{t("liveInterview.baseline.similarity")}</span>
         <div className="flex-1 h-1.5 rounded-full bg-[#F3F4F6] overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
@@ -62,7 +64,9 @@ export function BaselineCompare({ videoEl, baselineSrc, similarity }: Props) {
         className="text-xs py-1.5 w-full justify-center"
         icon={snapshot ? <RefreshCw className="w-3.5 h-3.5" /> : <Camera className="w-3.5 h-3.5" />}
       >
-        {snapshot ? "Retake snapshot" : "Take snapshot"}
+        {snapshot
+          ? t("liveInterview.baseline.retakeSnapshot")
+          : t("liveInterview.baseline.takeSnapshot")}
       </SecondaryBtn>
     </div>
   );

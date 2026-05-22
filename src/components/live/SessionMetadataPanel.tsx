@@ -1,10 +1,5 @@
 import { Globe, Cpu, Wifi, MonitorSmartphone, Volume2, Frame } from "lucide-react";
-
-interface Row {
-  Icon: typeof Globe;
-  label: string;
-  value: string;
-}
+import { useTranslation } from "react-i18next";
 
 interface Props {
   latencyMs: number;
@@ -12,13 +7,38 @@ interface Props {
 }
 
 export function SessionMetadataPanel({ latencyMs, frameRate }: Props) {
-  const rows: Row[] = [
-    { Icon: MonitorSmartphone, label: "Device", value: "MacBook Pro · Chrome 128" },
-    { Icon: Globe, label: "IP region", value: "Seoul, KR (anonymized)" },
-    { Icon: Wifi, label: "Latency", value: `${Math.round(latencyMs)} ms` },
-    { Icon: Volume2, label: "Audio gain", value: "−18 dBFS" },
-    { Icon: Frame, label: "Frame rate", value: `${frameRate.toFixed(0)} fps` },
-    { Icon: Cpu, label: "Stream codec", value: "VP9 · Opus" },
+  const { t } = useTranslation();
+  const rows = [
+    {
+      Icon: MonitorSmartphone,
+      label: t("liveInterview.metadata.device"),
+      value: t("liveInterview.metadata.deviceValue"),
+    },
+    {
+      Icon: Globe,
+      label: t("liveInterview.metadata.ipRegion"),
+      value: t("liveInterview.metadata.ipRegionValue"),
+    },
+    {
+      Icon: Wifi,
+      label: t("liveInterview.metadata.latency"),
+      value: t("liveInterview.metadata.latencyValue", { ms: Math.round(latencyMs) }),
+    },
+    {
+      Icon: Volume2,
+      label: t("liveInterview.metadata.audioGain"),
+      value: t("liveInterview.metadata.audioGainValue"),
+    },
+    {
+      Icon: Frame,
+      label: t("liveInterview.metadata.frameRate"),
+      value: t("liveInterview.metadata.frameRateValue", { fps: frameRate.toFixed(0) }),
+    },
+    {
+      Icon: Cpu,
+      label: t("liveInterview.metadata.codec"),
+      value: t("liveInterview.metadata.codecValue"),
+    },
   ];
   return (
     <div className="space-y-1.5">

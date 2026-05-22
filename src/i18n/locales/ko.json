@@ -368,6 +368,95 @@
       "areaVoice": "음성 샘플 품질"
     }
   },
+  "liveInterview": {
+    "title": "라이브 면접",
+    "noCandidatesSubtitle": "후보자가 없습니다",
+    "noCandidatesBody": "검증 요청을 만들면 라이브 검토를 시작할 수 있습니다.",
+    "goToCandidates": "후보자 페이지로",
+    "saveNotes": "노트 저장",
+    "savedNotesToast": "리뷰어 노트가 저장되었습니다",
+    "endSession": "세션 종료",
+    "endSessionToast": "세션 종료 — 리뷰어 콘솔로 이동합니다",
+    "principleStrong": "AI는 신호를 정리하고, 사람 리뷰어가 리포트를 확정합니다.",
+    "principleTail": "라이브 신호는 관찰 보조 도구이며 판정이 아닙니다.",
+    "pillDemo": "데모",
+    "pillLive": "라이브",
+    "faceTracking": "얼굴 추적 · {{percent}}%",
+    "faceModelLoading": "얼굴 모델 로딩 중…",
+    "guardrailChip": "AI는 신호를 정리하고, 사람 리뷰어가 리포트를 확정합니다.",
+    "controls": {
+      "muteDemo": "동영상 소리 음소거",
+      "unmuteDemo": "동영상 소리 켜기",
+      "muteLiveTooltip": "본인 화면은 에코 방지를 위해 음소거됩니다",
+      "camStart": "카메라 시작",
+      "camStop": "카메라 정지",
+      "fullscreen": "전체 화면"
+    },
+    "caption": {
+      "demoMuted": "데모 영상은 기본 음소거입니다. 마이크 아이콘을 눌러 소리를 켜세요.",
+      "demoUnmuted": "데모 영상 소리 켜짐 — 다시 누르면 음소거됩니다.",
+      "live": "라이브 카메라 모드 — 본 세션에만 사용됩니다."
+    },
+    "panels": {
+      "liveSignals": "라이브 신호",
+      "recentEvents": "최근 이벤트",
+      "reviewerNotes": "리뷰어 노트",
+      "baselineCompare": "기준선 비교",
+      "sessionMetadata": "세션 메타데이터",
+      "nextSteps": "다음 단계",
+      "notesPlaceholder": "라이브 세션 중 관찰 내용을 기록하세요…"
+    },
+    "signals": {
+      "liveness": "라이브니스",
+      "livenessHint": "눈 깜박임 + 미세 움직임 타당성",
+      "faceConsistency": "얼굴 일관성",
+      "faceConsistencyHint": "기준선 대비",
+      "voiceConsistency": "음성 일관성",
+      "voiceConsistencyHint": "제출된 음성 샘플 대비",
+      "sessionIntegrity": "세션 무결성",
+      "sessionIntegrityHint": "디바이스 + 네트워크 신호 안정성"
+    },
+    "source": {
+      "label": "영상 소스",
+      "demo": "데모 영상",
+      "live": "라이브 카메라"
+    },
+    "baseline": {
+      "baseline": "기준선",
+      "liveFrame": "라이브 프레임",
+      "takeSnapshot": "스냅샷 촬영",
+      "retakeSnapshot": "다시 촬영",
+      "snapshotEmpty": "스냅샷 촬영",
+      "similarity": "유사도"
+    },
+    "metadata": {
+      "device": "디바이스",
+      "ipRegion": "IP 지역",
+      "latency": "지연시간",
+      "audioGain": "오디오 게인",
+      "frameRate": "프레임 레이트",
+      "codec": "스트림 코덱",
+      "deviceValue": "MacBook Pro · Chrome 128",
+      "ipRegionValue": "Seoul, KR (익명화)",
+      "latencyValue": "{{ms}} ms",
+      "audioGainValue": "−18 dBFS",
+      "frameRateValue": "{{fps}} fps",
+      "codecValue": "VP9 · Opus"
+    },
+    "events": {
+      "demoSessionStarted": "데모 세션 시작됨",
+      "liveSessionStarted": "라이브 카메라 세션 시작됨",
+      "faceConsistencyDrop": "얼굴 일관성 저하 — 리뷰어 검토 권장",
+      "livenessDip": "라이브니스 신호가 잠시 약화됨",
+      "voiceMismatch": "음성 일관성이 기준 범위를 벗어남",
+      "manualReviewSuggested": "복수 주의 신호 — 수동 검토 권장",
+      "noEvents": "아직 이벤트가 없습니다."
+    },
+    "nextStep": {
+      "candidateDetail": "후보자 상세 열기",
+      "reviewerConsole": "리뷰어 콘솔로 계속"
+    }
+  },
   "candidateFlow": {
     "title": "HireSift 검증",
     "secure": "보안 세션",

@@ -1,4 +1,5 @@
 import { Video, Camera } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 
 export type LiveSource = "demo" | "live";
@@ -10,9 +11,10 @@ interface Props {
 }
 
 export function SourceToggle({ value, onChange, disabled }: Props) {
+  const { t } = useTranslation();
   const opts: { value: LiveSource; label: string; Icon: typeof Video }[] = [
-    { value: "demo", label: "Demo video", Icon: Video },
-    { value: "live", label: "Live camera", Icon: Camera },
+    { value: "demo", label: t("liveInterview.source.demo"), Icon: Video },
+    { value: "live", label: t("liveInterview.source.live"), Icon: Camera },
   ];
   return (
     <div
@@ -21,7 +23,7 @@ export function SourceToggle({ value, onChange, disabled }: Props) {
         disabled && "opacity-60 pointer-events-none",
       )}
       role="group"
-      aria-label="Video source"
+      aria-label={t("liveInterview.source.label")}
     >
       {opts.map((opt) => {
         const active = value === opt.value;

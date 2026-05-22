@@ -27,6 +27,7 @@ import { toast } from "../components/primitives/Toaster";
 import { useLiveSignals } from "../hooks/useLiveSignals";
 import { useMediaRecorder } from "../hooks/useMediaRecorder";
 import { useFaceTracking } from "../hooks/useFaceTracking";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/cn";
 
 const DEMO_VIDEO = "/demo/interview.mp4";
@@ -41,6 +42,7 @@ function formatTimer(ms: number) {
 
 export default function LiveInterviewPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId?: string }>();
   const candidates = listCandidates();
 
@@ -176,13 +178,13 @@ export default function LiveInterviewPage() {
   if (!candidate) {
     return (
       <div className="flex flex-col h-full overflow-hidden">
-        <TopBar title="Live Interview" subtitle="No candidates yet" />
+        <TopBar title={t("liveInterview.title")} subtitle={t("liveInterview.noCandidatesSubtitle")} />
         <div className="flex-1 flex items-center justify-center p-6">
           <Card className="p-8 text-center max-w-sm">
-            <p className="text-sm text-[#6B7280] mb-4">
-              Create a verification request to start reviewing candidates live.
-            </p>
-            <PrimaryBtn onClick={() => navigate("/app/candidates")}>Go to Candidates</PrimaryBtn>
+            <p className="text-sm text-[#6B7280] mb-4">{t("liveInterview.noCandidatesBody")}</p>
+            <PrimaryBtn onClick={() => navigate("/app/candidates")}>
+              {t("liveInterview.goToCandidates")}
+            </PrimaryBtn>
           </Card>
         </div>
       </div>
@@ -194,7 +196,7 @@ export default function LiveInterviewPage() {
 
   const onSaveNotes = () => {
     setNotes(candidate.id, note);
-    toast.success("Reviewer notes saved");
+    toast.success(t("liveInterview.savedNotesToast"));
   };
 
   const onEndSession = () => {
@@ -204,27 +206,27 @@ export default function LiveInterviewPage() {
       candidate: candidate.code,
       type: "review",
     });
-    toast.success("Session ended — continuing to reviewer console");
+    toast.success(t("liveInterview.endSessionToast"));
     navigate(`/app/reviewer/${candidate.id}`);
   };
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Live Interview"
+        title={t("liveInterview.title")}
         subtitle={`${candidate.name} · ${candidate.code} · ${formatTimer(elapsedMs)}`}
         actions={
           <div className="flex items-center gap-2">
             <SourceToggle value={source} onChange={setSource} />
             <SecondaryBtn onClick={onSaveNotes} className="text-sm py-2">
-              Save notes
+              {t("liveInterview.saveNotes")}
             </SecondaryBtn>
             <PrimaryBtn
               onClick={onEndSession}
               className="text-sm py-2"
               icon={<PhoneOff className="w-4 h-4" />}
             >
-              End Session
+              {t("liveInterview.endSession")}
             </PrimaryBtn>
           </div>
         }
@@ -235,9 +237,9 @@ export default function LiveInterviewPage() {
           <Shield className="w-3.5 h-3.5 text-[#172033]" />
           <span>
             <strong className="font-semibold text-[#172033]">
-              AI organizes signals. Human reviewer confirms the report.
+              {t("liveInterview.principleStrong")}
             </strong>{" "}
-            Live signals are observation aids, not verdicts.
+            {t("liveInterview.principleTail")}
           </span>
         </div>
 
@@ -264,19 +266,19 @@ export default function LiveInterviewPage() {
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white text-[11px] font-medium">
                     <span className="w-2 h-2 rounded-full bg-[#C6923A] animate-pulse" />
-                    {source === "live" ? "LIVE" : "DEMO"}
+                    {source === "live" ? t("liveInterview.pillLive") : t("liveInterview.pillDemo")}
                   </div>
                   <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white text-[11px] font-mono">
                     {formatTimer(elapsedMs)}
                   </div>
                   {landmarks && (
                     <div className="px-2.5 py-1 rounded-md bg-[#2F7D7E]/80 backdrop-blur text-white text-[10px] font-medium">
-                      Face tracking · {Math.round(confidence * 100)}%
+                      {t("liveInterview.faceTracking", { percent: Math.round(confidence * 100) })}
                     </div>
                   )}
                   {!faceReady && !landmarks && (
                     <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white/70 text-[10px] font-medium">
-                      Loading face model…
+                      {t("liveInterview.faceModelLoading")}
                     </div>
                   )}
                 </div>
@@ -288,7 +290,7 @@ export default function LiveInterviewPage() {
 
                 {/* Guardrail chip — bottom-left */}
                 <div className="absolute bottom-3 left-3 max-w-[60%] px-3 py-2 rounded-lg bg-black/55 backdrop-blur text-white/90 text-[11px] leading-snug">
-                  AI organizes signals. Human reviewer confirms the report.
+                  {t("liveInterview.guardrailChip")}
                 </div>
 
                 {/* Permission error */}
@@ -307,10 +309,10 @@ export default function LiveInterviewPage() {
                     onClick={() => setAudioOn((v) => !v)}
                     title={
                       source === "live"
-                        ? "Self-view is muted to avoid echo"
+                        ? t("liveInterview.controls.muteLiveTooltip")
                         : audioOn
-                        ? "Mute video sound"
-                        : "Unmute video sound"
+                        ? t("liveInterview.controls.muteDemo")
+                        : t("liveInterview.controls.unmuteDemo")
                     }
                     disabled={source === "live"}
                   >
@@ -320,13 +322,13 @@ export default function LiveInterviewPage() {
                     active={camOn}
                     onClick={() => setCamOn((v) => !v)}
                     disabled={source !== "live"}
-                    title={camOn ? "Stop camera" : "Start camera"}
+                    title={camOn ? t("liveInterview.controls.camStop") : t("liveInterview.controls.camStart")}
                   >
                     {camOn ? <VideoIcon className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
                   </ControlButton>
                   <ControlButton
                     onClick={() => videoRef.current?.requestFullscreen?.()}
-                    title="Fullscreen"
+                    title={t("liveInterview.controls.fullscreen")}
                   >
                     <Maximize2 className="w-4 h-4" />
                   </ControlButton>
@@ -334,40 +336,40 @@ export default function LiveInterviewPage() {
                 <div className="text-[11px] text-[#9CA3AF]">
                   {source === "demo"
                     ? audioOn
-                      ? "Demo playback with audio — click the mic again to mute."
-                      : "Demo playback is muted by default. Click the mic to hear the clip."
-                    : "Live camera mode — your device feed is used only for this session."}
+                      ? t("liveInterview.caption.demoUnmuted")
+                      : t("liveInterview.caption.demoMuted")
+                    : t("liveInterview.caption.live")}
                 </div>
               </div>
             </Card>
 
             {/* Signal gauges in 2x2 */}
             <Card className="p-4">
-              <SectionLabel>Live Signals</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.liveSignals")}</SectionLabel>
               <div className="grid grid-cols-2 gap-3 -mt-1">
                 <SignalGauge
-                  label="Liveness"
+                  label={t("liveInterview.signals.liveness")}
                   value={signals.liveness.value}
                   status={signals.liveness.status}
-                  hint="Eye blink + micro-motion plausibility"
+                  hint={t("liveInterview.signals.livenessHint")}
                 />
                 <SignalGauge
-                  label="Face consistency"
+                  label={t("liveInterview.signals.faceConsistency")}
                   value={signals.faceConsistency.value}
                   status={signals.faceConsistency.status}
-                  hint="vs. baseline reference"
+                  hint={t("liveInterview.signals.faceConsistencyHint")}
                 />
                 <SignalGauge
-                  label="Voice consistency"
+                  label={t("liveInterview.signals.voiceConsistency")}
                   value={signals.voiceConsistency.value}
                   status={signals.voiceConsistency.status}
-                  hint="vs. submitted voice sample"
+                  hint={t("liveInterview.signals.voiceConsistencyHint")}
                 />
                 <SignalGauge
-                  label="Session integrity"
+                  label={t("liveInterview.signals.sessionIntegrity")}
                   value={signals.sessionIntegrity.value}
                   status={signals.sessionIntegrity.status}
-                  hint="Device + network signal stability"
+                  hint={t("liveInterview.signals.sessionIntegrityHint")}
                 />
               </div>
             </Card>
@@ -376,26 +378,26 @@ export default function LiveInterviewPage() {
           {/* RIGHT — Side panels */}
           <div className="space-y-4">
             <Card className="p-4">
-              <SectionLabel>Recent events</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.recentEvents")}</SectionLabel>
               <EventTimeline events={signals.events} />
             </Card>
 
             <Card className="p-4">
-              <SectionLabel>Reviewer notes</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.reviewerNotes")}</SectionLabel>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Capture observations during the live session…"
+                placeholder={t("liveInterview.panels.notesPlaceholder")}
                 rows={5}
                 className="w-full text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30 resize-none"
               />
               <SecondaryBtn onClick={onSaveNotes} className="text-xs py-1.5 mt-2 w-full justify-center">
-                Save notes
+                {t("liveInterview.saveNotes")}
               </SecondaryBtn>
             </Card>
 
             <Card className="p-4">
-              <SectionLabel>Baseline comparison</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.baselineCompare")}</SectionLabel>
               <BaselineCompare
                 videoEl={videoRef.current}
                 baselineSrc={BASELINE_IMG}
@@ -404,7 +406,7 @@ export default function LiveInterviewPage() {
             </Card>
 
             <Card className="p-4">
-              <SectionLabel>Session metadata</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.sessionMetadata")}</SectionLabel>
               <SessionMetadataPanel
                 latencyMs={42 + Math.sin(tick / 3) * 6}
                 frameRate={24 + Math.sin(tick / 5) * 1.2}
@@ -412,20 +414,20 @@ export default function LiveInterviewPage() {
             </Card>
 
             <Card className="p-4">
-              <SectionLabel>Next steps</SectionLabel>
+              <SectionLabel>{t("liveInterview.panels.nextSteps")}</SectionLabel>
               <div className="space-y-2">
                 <SecondaryBtn
                   onClick={() => navigate(`/app/candidates/${candidate.id}`)}
                   className="w-full justify-center text-sm"
                   icon={<CameraIcon className="w-4 h-4" />}
                 >
-                  Open Candidate Detail
+                  {t("liveInterview.nextStep.candidateDetail")}
                 </SecondaryBtn>
                 <PrimaryBtn
                   onClick={() => navigate(`/app/reviewer/${candidate.id}`)}
                   className="w-full justify-center text-sm"
                 >
-                  Continue to Reviewer Console
+                  {t("liveInterview.nextStep.reviewerConsole")}
                 </PrimaryBtn>
               </div>
             </Card>

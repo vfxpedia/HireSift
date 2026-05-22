@@ -1,4 +1,5 @@
 import { AlertTriangle, Info, Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import type { LiveEvent } from "../../hooks/useLiveSignals";
 
@@ -22,8 +23,9 @@ function formatRelative(ms: number) {
 }
 
 export function EventTimeline({ events }: Props) {
+  const { t } = useTranslation();
   if (events.length === 0) {
-    return <p className="text-xs text-[#9CA3AF] py-2">No events yet.</p>;
+    return <p className="text-xs text-[#9CA3AF] py-2">{t("liveInterview.events.noEvents")}</p>;
   }
   return (
     <div className="space-y-2">
@@ -39,7 +41,7 @@ export function EventTimeline({ events }: Props) {
               <Icon className={cn("w-3 h-3", cfg.text)} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-[#374151] leading-snug">{e.label}</p>
+              <p className="text-xs text-[#374151] leading-snug">{t(e.labelKey)}</p>
               <p className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">{formatRelative(e.at)}</p>
             </div>
           </div>

@@ -368,6 +368,95 @@
       "areaVoice": "Voice sample quality"
     }
   },
+  "liveInterview": {
+    "title": "Live Interview",
+    "noCandidatesSubtitle": "No candidates yet",
+    "noCandidatesBody": "Create a verification request to start reviewing candidates live.",
+    "goToCandidates": "Go to Candidates",
+    "saveNotes": "Save notes",
+    "savedNotesToast": "Reviewer notes saved",
+    "endSession": "End Session",
+    "endSessionToast": "Session ended — continuing to reviewer console",
+    "principleStrong": "AI organizes signals. Human reviewer confirms the report.",
+    "principleTail": "Live signals are observation aids, not verdicts.",
+    "pillDemo": "DEMO",
+    "pillLive": "LIVE",
+    "faceTracking": "Face tracking · {{percent}}%",
+    "faceModelLoading": "Loading face model…",
+    "guardrailChip": "AI organizes signals. Human reviewer confirms the report.",
+    "controls": {
+      "muteDemo": "Mute video sound",
+      "unmuteDemo": "Unmute video sound",
+      "muteLiveTooltip": "Self-view is muted to avoid echo",
+      "camStart": "Start camera",
+      "camStop": "Stop camera",
+      "fullscreen": "Fullscreen"
+    },
+    "caption": {
+      "demoMuted": "Demo playback is muted by default. Click the mic to hear the clip.",
+      "demoUnmuted": "Demo playback with audio — click the mic again to mute.",
+      "live": "Live camera mode — your device feed is used only for this session."
+    },
+    "panels": {
+      "liveSignals": "Live Signals",
+      "recentEvents": "Recent events",
+      "reviewerNotes": "Reviewer notes",
+      "baselineCompare": "Baseline comparison",
+      "sessionMetadata": "Session metadata",
+      "nextSteps": "Next steps",
+      "notesPlaceholder": "Capture observations during the live session…"
+    },
+    "signals": {
+      "liveness": "Liveness",
+      "livenessHint": "Eye blink + micro-motion plausibility",
+      "faceConsistency": "Face consistency",
+      "faceConsistencyHint": "vs. baseline reference",
+      "voiceConsistency": "Voice consistency",
+      "voiceConsistencyHint": "vs. submitted voice sample",
+      "sessionIntegrity": "Session integrity",
+      "sessionIntegrityHint": "Device + network signal stability"
+    },
+    "source": {
+      "label": "Video source",
+      "demo": "Demo video",
+      "live": "Live camera"
+    },
+    "baseline": {
+      "baseline": "Baseline",
+      "liveFrame": "Live frame",
+      "takeSnapshot": "Take snapshot",
+      "retakeSnapshot": "Retake snapshot",
+      "snapshotEmpty": "Take snapshot",
+      "similarity": "Similarity"
+    },
+    "metadata": {
+      "device": "Device",
+      "ipRegion": "IP region",
+      "latency": "Latency",
+      "audioGain": "Audio gain",
+      "frameRate": "Frame rate",
+      "codec": "Stream codec",
+      "deviceValue": "MacBook Pro · Chrome 128",
+      "ipRegionValue": "Seoul, KR (anonymized)",
+      "latencyValue": "{{ms}} ms",
+      "audioGainValue": "−18 dBFS",
+      "frameRateValue": "{{fps}} fps",
+      "codecValue": "VP9 · Opus"
+    },
+    "events": {
+      "demoSessionStarted": "Demo session started",
+      "liveSessionStarted": "Live camera session started",
+      "faceConsistencyDrop": "Face consistency dropped — reviewer attention recommended",
+      "livenessDip": "Liveness signal weakened briefly",
+      "voiceMismatch": "Voice consistency outside baseline range",
+      "manualReviewSuggested": "Multiple attention signals — manual review suggested",
+      "noEvents": "No events yet."
+    },
+    "nextStep": {
+      "candidateDetail": "Open Candidate Detail",
+      "reviewerConsole": "Continue to Reviewer Console"
+    }
+  },
   "candidateFlow": {
     "title": "HireSift Verification",
     "secure": "Secure session",

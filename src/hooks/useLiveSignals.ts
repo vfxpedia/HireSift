@@ -9,7 +9,8 @@ export interface LiveSignal {
 export interface LiveEvent {
   id: string;
   at: number; // ms since session start
-  label: string;
+  /** i18n key under `liveInterview.events.*` — rendered by EventTimeline. */
+  labelKey: string;
   kind: "info" | "warn" | "critical";
 }
 
@@ -66,7 +67,7 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
       {
         id: "seed-1",
         at: 0,
-        label: "Live session started",
+        labelKey: "liveInterview.events.demoSessionStarted",
         kind: "info",
       },
     ],
@@ -87,7 +88,9 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
         {
           id: `start-${Date.now()}`,
           at: 0,
-          label: liveMode ? "Live camera session started" : "Demo session started",
+          labelKey: liveMode
+            ? "liveInterview.events.liveSessionStarted"
+            : "liveInterview.events.demoSessionStarted",
           kind: "info",
         },
       ],
@@ -117,7 +120,7 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
               newEvents.push({
                 id: `face-${Date.now()}`,
                 at: t * 1000,
-                label: "Face consistency dropped — reviewer attention recommended",
+                labelKey: "liveInterview.events.faceConsistencyDrop",
                 kind: "warn",
               });
             }
@@ -129,7 +132,7 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
               newEvents.push({
                 id: `live-${Date.now()}`,
                 at: t * 1000,
-                label: "Liveness signal weakened briefly",
+                labelKey: "liveInterview.events.livenessDip",
                 kind: "warn",
               });
             }
@@ -141,7 +144,7 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
               newEvents.push({
                 id: `voice-${Date.now()}`,
                 at: t * 1000,
-                label: "Voice consistency outside baseline range",
+                labelKey: "liveInterview.events.voiceMismatch",
                 kind: "warn",
               });
             }
@@ -151,7 +154,7 @@ export function useLiveSignals({ active, videoTime, liveMode = false }: Options)
             newEvents.push({
               id: `review-${Date.now()}`,
               at: t * 1000,
-              label: "Multiple attention signals — manual review suggested",
+              labelKey: "liveInterview.events.manualReviewSuggested",
               kind: "critical",
             });
           }
