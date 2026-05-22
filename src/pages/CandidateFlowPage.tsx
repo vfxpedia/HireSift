@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { LanguageToggle } from "../components/primitives/LanguageToggle";
 import {
   Shield,
   Lock,
@@ -39,18 +41,19 @@ import {
 import type { BasicInfo, PortfolioLink, MediaAsset } from "../types";
 
 const STEPS = [
-  { label: "Consent", icon: Lock },
-  { label: "Basic Info", icon: User },
-  { label: "Portfolio", icon: LinkIcon },
-  { label: "Document", icon: FileText },
-  { label: "Selfie", icon: Video },
-  { label: "Voice", icon: Mic },
-  { label: "Review", icon: Eye },
-  { label: "Complete", icon: CheckCircle },
-];
+  { tKey: "consent", icon: Lock },
+  { tKey: "basicInfo", icon: User },
+  { tKey: "portfolio", icon: LinkIcon },
+  { tKey: "document", icon: FileText },
+  { tKey: "selfie", icon: Video },
+  { tKey: "voice", icon: Mic },
+  { tKey: "review", icon: Eye },
+  { tKey: "complete", icon: CheckCircle },
+] as const;
 
 export default function CandidateFlowPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId?: string }>();
 
   const targetId = useMemo(() => {
@@ -97,15 +100,18 @@ export default function CandidateFlowPage() {
               <Shield className="w-3.5 h-3.5 text-white" />
             </div>
             <div>
-              <p className="font-semibold text-sm text-[#172033]">HireSift Verification</p>
+              <p className="font-semibold text-sm text-[#172033]">{t("candidateFlow.title")}</p>
               <p className="text-[10px] text-[#9CA3AF] font-mono">
                 {candidate.code} · {candidate.role}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#F7F8FA] px-3 py-1.5 rounded-lg">
-            <Lock className="w-3 h-3 text-[#6B7280]" />
-            <span className="text-xs text-[#6B7280]">Secure session</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 bg-[#F7F8FA] px-3 py-1.5 rounded-lg">
+              <Lock className="w-3 h-3 text-[#6B7280]" />
+              <span className="text-xs text-[#6B7280]">{t("candidateFlow.secure")}</span>
+            </div>
+            <LanguageToggle />
           </div>
         </div>
       </header>
@@ -114,7 +120,7 @@ export default function CandidateFlowPage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center">
             {STEPS.map((s, i) => (
-              <div key={s.label} className="flex items-center flex-1 last:flex-none">
+              <div key={s.tKey} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -134,7 +140,7 @@ export default function CandidateFlowPage() {
                       i === step ? "text-[#172033] font-medium" : "text-[#9CA3AF]",
                     )}
                   >
-                    {s.label}
+                    {t(`candidateFlow.step.${s.tKey}`)}
                   </p>
                 </div>
                 {i < STEPS.length - 1 && (

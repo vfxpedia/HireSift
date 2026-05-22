@@ -22,6 +22,7 @@ import { getReview, saveReview, setNotes, setRecommendedAction } from "../api/re
 import { generateReport } from "../api/reports";
 import { addAudit } from "../api/audit";
 import { toast } from "../components/primitives/Toaster";
+import { useTranslation } from "react-i18next";
 import type { AttentionLevel, RecommendedAction } from "../types";
 
 const ACTION_OPTIONS: { value: RecommendedAction; label: string }[] = [
@@ -34,6 +35,7 @@ const ACTION_OPTIONS: { value: RecommendedAction; label: string }[] = [
 
 export default function ReviewerPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId?: string }>();
   const candidates = listCandidates();
 
@@ -233,7 +235,7 @@ export default function ReviewerPage() {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-6xl mx-auto mb-4 flex items-center gap-2 bg-[#172033]/5 border border-[#172033]/10 rounded-xl px-4 py-2.5 text-xs text-[#374151]">
           <Shield className="w-3.5 h-3.5 text-[#172033]" />
-          <span><strong className="font-semibold text-[#172033]">AI organizes signals. Human reviewer confirms the report.</strong> No automatic hiring decision is made by HireSift.</span>
+          <span>{t("report.aiOrganizes")}</span>
         </div>
         <div className="grid lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 space-y-5">
