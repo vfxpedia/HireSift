@@ -1,0 +1,51 @@
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  aside,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    overflow: visible !important;
+  }
+
+  .h-16,
+  .h-screen {
+    height: auto !important;
+  }
+
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  #report-root {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .shadow-xl,
+  .shadow-2xl,
+  .shadow-sm,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  .border {
+    border-color: #d1d5db !important;
+  }
+}
