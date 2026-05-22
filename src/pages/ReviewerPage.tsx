@@ -7,15 +7,21 @@ import {
   Save,
   Check,
   ChevronDown,
+  Shield,
+  MessageSquare,
+  AlertTriangle,
 } from "lucide-react";
 import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
-import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
+import { PrimaryBtn, SecondaryBtn, AttentionBtn } from "../components/primitives/Buttons";
 import { AttentionBadge } from "../components/primitives/Badges";
-import { listCandidates, getCandidate } from "../api/candidates";
+import { RequestMoreInfoModal } from "../components/modals/RequestMoreInfoModal";
+import { listCandidates, getCandidate, setAttention } from "../api/candidates";
 import { getSubmission } from "../api/submissions";
-import { getReview, setNotes, setRecommendedAction } from "../api/reviews";
+import { getReview, saveReview, setNotes, setRecommendedAction } from "../api/reviews";
 import { generateReport } from "../api/reports";
+import { addAudit } from "../api/audit";
+import { toast } from "../components/primitives/Toaster";
 import type { AttentionLevel, RecommendedAction } from "../types";
 
 const ACTION_OPTIONS: { value: RecommendedAction; label: string }[] = [
@@ -48,6 +54,9 @@ export default function ReviewerPage() {
   const [action, setAction] = useState<RecommendedAction>(review?.recommendedAction ?? "no-action");
   const [savedTick, setSavedTick] = useState<number | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [, setTick] = useState(0);
+  const refresh = () => setTick((t) => t + 1);
 
   if (!candidate) {
     return (
@@ -137,12 +146,36 @@ export default function ReviewerPage() {
     setRecommendedAction(candidate.id, action);
     setSavedTick(Date.now());
     setTimeout(() => setSavedTick(null), 1500);
+    toast.success("Draft saved");
   };
 
   const onGenerate = () => {
     setNotes(candidate.id, note);
     setRecommendedAction(candidate.id, action);
     generateReport(candidate);
+    toast.success("Trust report generated");
+    navigate(`/app/reports/${candidate.id}`);
+  };
+
+  const onMarkManualReview = () => {
+    saveReview(candidate.id, { recommendedAction: "manual-review", notes: note });
+    setAction("manual-review");
+    setAttention(candidate.id, "manual");
+    addAudit({
+      action: "Marked for Manual Review",
+      user: candidate.reviewer ?? "Reviewer",
+      candidate: candidate.code,
+      type: "review",
+    });
+    toast.success("Candidate flagged for manual review");
+    refresh();
+  };
+
+  const onPreviewReport = () => {
+    if (!candidate.reportReady) {
+      toast.error("Generate the Trust Report first before previewing.");
+      return;
+    }
     navigate(`/app/reports/${candidate.id}`);
   };
 
@@ -186,19 +219,22 @@ export default function ReviewerPage() {
                 </div>
               )}
             </div>
-            {candidate.reportReady && (
-              <SecondaryBtn
-                onClick={() => navigate(`/app/reports/${candidate.id}`)}
-                className="text-sm py-2"
-                icon={<Eye className="w-4 h-4" />}
-              >
-                View Report
-              </SecondaryBtn>
-            )}
+            <SecondaryBtn
+              onClick={onPreviewReport}
+              className="text-sm py-2"
+              icon={<Eye className="w-4 h-4" />}
+              disabled={!candidate.reportReady}
+            >
+              {candidate.reportReady ? "Preview Report" : "Report not ready"}
+            </SecondaryBtn>
           </div>
         }
       />
       <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-6xl mx-auto mb-4 flex items-center gap-2 bg-[#172033]/5 border border-[#172033]/10 rounded-xl px-4 py-2.5 text-xs text-[#374151]">
+          <Shield className="w-3.5 h-3.5 text-[#172033]" />
+          <span><strong className="font-semibold text-[#172033]">AI organizes signals. Human reviewer confirms the report.</strong> No automatic hiring decision is made by HireSift.</span>
+        </div>
         <div className="grid lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 space-y-5">
             <Card className="p-5">
@@ -384,6 +420,20 @@ export default function ReviewerPage() {
 
             <div className="space-y-2">
               <SecondaryBtn
+                onClick={() => setShowRequestModal(true)}
+                className="w-full justify-center text-sm"
+                icon={<MessageSquare className="w-4 h-4" />}
+              >
+                Request More Info
+              </SecondaryBtn>
+              <AttentionBtn
+                onClick={onMarkManualReview}
+                className="w-full justify-center text-sm"
+                icon={<AlertTriangle className="w-4 h-4" />}
+              >
+                Mark for Manual Review
+              </AttentionBtn>
+              <SecondaryBtn
                 onClick={saveDraft}
                 className="w-full justify-center text-sm"
                 icon={savedTick ? <Check className="w-4 h-4 text-[#2F7D7E]" /> : <Save className="w-4 h-4" />}
@@ -398,6 +448,12 @@ export default function ReviewerPage() {
           </div>
         </div>
       </div>
+      <RequestMoreInfoModal
+        open={showRequestModal}
+        onClose={() => setShowRequestModal(false)}
+        candidate={candidate}
+        reviewer={candidate.reviewer}
+      />
     </div>
   );
 }

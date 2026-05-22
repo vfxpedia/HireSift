@@ -19,10 +19,17 @@ import { Card, SectionLabel, GuardrailNotice } from "../components/primitives/Ca
 import { AttentionBadge, StatusBadge } from "../components/primitives/Badges";
 import { PrimaryBtn, SecondaryBtn, AttentionBtn } from "../components/primitives/Buttons";
 import { cn } from "../lib/cn";
-import { listCandidates, getCandidate } from "../api/candidates";
+import { listCandidates, getCandidate, setSubmissionStatus } from "../api/candidates";
 import { getReport, listReports } from "../api/reports";
-import { formatDate } from "../lib/format";
+import { setRecommendedAction } from "../api/reviews";
+import { getSubmission } from "../api/submissions";
+import { formatDate, formatDateTime } from "../lib/format";
 import { addAudit } from "../api/audit";
+import { toast } from "../components/primitives/Toaster";
+import { useEffect, useState } from "react";
+import { ExportPdfModal, type ExportOptions } from "../components/modals/ExportPdfModal";
+import { ShareReportModal } from "../components/modals/ShareReportModal";
+import type { AttentionLevel, SignalRow } from "../types";
 
 export default function TrustReportPage() {
   const navigate = useNavigate();
@@ -34,6 +41,15 @@ export default function TrustReportPage() {
     return reports[0]?.candidateId ?? listCandidates().find((c) => c.reportReady)?.id;
   }, [candidateId, reports]);
 
+  const [, setTick] = useState(0);
+  const refresh = () => setTick((t) => t + 1);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [exportOpts, setExportOpts] = useState<ExportOptions>({
+    includeEvidenceCards: true,
+    includeReviewerNotes: true,
+    includeGuardrailNotice: true,
+  });
   const candidate = targetId ? getCandidate(targetId) : undefined;
   const report = targetId ? getReport(targetId) : undefined;
 
@@ -53,31 +69,44 @@ export default function TrustReportPage() {
     );
   }
 
-  const onExport = () => {
+  const runExport = (opts: ExportOptions) => {
+    setExportOpts(opts);
     addAudit({
       action: "PDF Export Requested",
       user: report.reviewer,
       candidate: candidate.code,
       type: "report",
     });
-    window.print();
+    // Allow state to flush so conditional sections re-render before printing
+    setTimeout(() => window.print(), 50);
   };
 
-  const onShare = async () => {
-    const url = `${window.location.origin}/app/reports/${candidate.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      addAudit({
-        action: "Report Shared",
-        user: report.reviewer,
-        candidate: candidate.code,
-        type: "share",
-      });
-      alert(`Report link copied to clipboard:\n${url}`);
-    } catch {
-      alert(`Share link:\n${url}`);
-    }
-  };
+  const submission = getSubmission(candidate.id);
+
+  // Signal overview metrics
+  const signalCounts = report.signalMatrix.reduce(
+    (acc, row) => {
+      acc[row.status] = (acc[row.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<AttentionLevel, number>,
+  );
+  const totalSignals = report.signalMatrix.length;
+  const lowCount = signalCounts.low ?? 0;
+  const reviewCount = (signalCounts.medium ?? 0) + (signalCounts.high ?? 0);
+  const manualCount = signalCounts.manual ?? 0;
+
+  // Section completion
+  const sectionStatuses = [
+    { label: "Consent", done: submission.consent.agreed },
+    { label: "Basic Info", done: !!submission.basicInfo },
+    { label: "Portfolio", done: submission.portfolio.length > 0 },
+    { label: "Document", done: !!submission.document },
+    { label: "Selfie", done: !!submission.selfie },
+    { label: "Voice", done: !!submission.voice },
+  ];
+  const completedCount = sectionStatuses.filter((s) => s.done).length;
+  const completionPct = Math.round((completedCount / sectionStatuses.length) * 100);
 
   const summaryCards = [
     {
@@ -114,10 +143,18 @@ export default function TrustReportPage() {
         subtitle={`${candidate.name} · ${candidate.code}`}
         actions={
           <div className="flex items-center gap-2">
-            <SecondaryBtn onClick={onShare} className="text-sm py-2" icon={<Share2 className="w-4 h-4" />}>
+            <SecondaryBtn
+              onClick={() => setShowShareModal(true)}
+              className="text-sm py-2"
+              icon={<Share2 className="w-4 h-4" />}
+            >
               Share
             </SecondaryBtn>
-            <PrimaryBtn onClick={onExport} className="text-sm py-2" icon={<Download className="w-4 h-4" />}>
+            <PrimaryBtn
+              onClick={() => setShowExportModal(true)}
+              className="text-sm py-2"
+              icon={<Download className="w-4 h-4" />}
+            >
               Export PDF
             </PrimaryBtn>
           </div>
@@ -183,6 +220,74 @@ export default function TrustReportPage() {
             </div>
           </div>
 
+          {/* Signal Overview + Attention Distribution + Completion Progress */}
+          <Card className="p-5">
+            <div className="grid md:grid-cols-3 gap-5">
+              <div>
+                <SectionLabel>Signal Overview</SectionLabel>
+                <div className="grid grid-cols-3 gap-2 -mt-1">
+                  <OverviewStat label="Low" value={lowCount} color="#2F7D7E" />
+                  <OverviewStat label="Review" value={reviewCount} color="#C6923A" />
+                  <OverviewStat label="Manual" value={manualCount} color="#172033" />
+                </div>
+                <p className="text-[11px] text-[#9CA3AF] mt-3">
+                  {totalSignals} signals organized across {sectionStatuses.length} candidate sections.
+                </p>
+              </div>
+              <div>
+                <SectionLabel>Attention Distribution</SectionLabel>
+                <div className="-mt-1">
+                  <div className="flex w-full h-3 rounded-full overflow-hidden bg-[#F3F4F6]">
+                    {totalSignals > 0 && (
+                      <>
+                        <div className="h-full bg-[#2F7D7E]" style={{ width: `${(lowCount / totalSignals) * 100}%` }} />
+                        <div className="h-full bg-[#C6923A]" style={{ width: `${(reviewCount / totalSignals) * 100}%` }} />
+                        <div className="h-full bg-[#172033]" style={{ width: `${(manualCount / totalSignals) * 100}%` }} />
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-between mt-2 text-[10px] text-[#6B7280]">
+                    <Legend color="#2F7D7E" label="Low" />
+                    <Legend color="#C6923A" label="Review" />
+                    <Legend color="#172033" label="Manual" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <SectionLabel>Section Completion</SectionLabel>
+                <div className="-mt-1">
+                  <div className="flex items-baseline gap-1.5 mb-2">
+                    <span className="text-2xl font-bold text-[#111827]">{completionPct}%</span>
+                    <span className="text-xs text-[#6B7280]">
+                      ({completedCount}/{sectionStatuses.length} sections)
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden mb-3">
+                    <div
+                      className="h-full bg-[#2F7D7E] transition-all"
+                      style={{ width: `${completionPct}%` }}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sectionStatuses.map((s) => (
+                      <span
+                        key={s.label}
+                        className={cn(
+                          "text-[10px] px-1.5 py-0.5 rounded font-medium",
+                          s.done
+                            ? "bg-[#2F7D7E]/10 text-[#2F7D7E]"
+                            : "bg-[#F3F4F6] text-[#9CA3AF]",
+                        )}
+                      >
+                        {s.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
           <Card>
             <div className="px-5 py-4 border-b border-[#E5E7EB]">
               <SectionLabel>Signal Matrix</SectionLabel>
@@ -218,9 +323,52 @@ export default function TrustReportPage() {
             </div>
           </Card>
 
+          {/* Evidence Card Grid */}
+          {exportOpts.includeEvidenceCards && (
+            <div>
+              <SectionLabel>Evidence Cards</SectionLabel>
+              <div className="grid md:grid-cols-2 gap-3">
+                {report.signalMatrix.map((row, i) => (
+                  <EvidenceCard
+                    key={i}
+                    row={row}
+                    source={candidate.code}
+                    timestamp={report.generatedAt}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <Card className="p-5">
             <SectionLabel>Portfolio Provenance</SectionLabel>
             <p className="text-sm font-semibold text-[#111827] mb-4 -mt-1">Portfolio Account Review</p>
+            {report.portfolio.length > 0 && (
+              <div className="mb-5 pb-5 border-b border-[#E5E7EB]">
+                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF] mb-3">Account timeline</p>
+                <div className="relative pl-3">
+                  <div className="absolute left-1 top-2 bottom-2 w-px bg-[#E5E7EB]" />
+                  {report.portfolio.map((p) => (
+                    <div key={p.platform + p.url} className="relative mb-3 last:mb-0">
+                      <div
+                        className="absolute -left-2 top-1 w-2.5 h-2.5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            p.status === "low" ? "#2F7D7E" : p.status === "medium" ? "#C6923A" : "#172033",
+                        }}
+                      />
+                      <div className="ml-3">
+                        <p className="text-xs font-semibold text-[#374151]">{p.platform}</p>
+                        <p className="text-[11px] text-[#9CA3AF] font-mono">{p.url}</p>
+                        <p className="text-[10px] text-[#6B7280] mt-0.5">
+                          Account age: <strong className="text-[#374151]">{p.age}</strong> · {p.activity}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="space-y-3">
               {report.portfolio.map((p) => (
                 <div key={p.platform + p.url} className="border border-[#E5E7EB] rounded-xl p-4">
@@ -329,18 +477,48 @@ export default function TrustReportPage() {
                   {report.recommendedActionDetail}
                 </p>
                 <div className="flex gap-2.5 print:hidden">
-                  <AttentionBtn className="text-sm py-2" icon={<RefreshCw className="w-3.5 h-3.5" />}>
+                  <AttentionBtn
+                    className="text-sm py-2"
+                    icon={<RefreshCw className="w-3.5 h-3.5" />}
+                    onClick={() => {
+                      setRecommendedAction(candidate.id, "verification-call");
+                      addAudit({
+                        action: "Follow-up Requested",
+                        user: report.reviewer,
+                        candidate: candidate.code,
+                        type: "review",
+                      });
+                      toast.success("Follow-up requested — candidate has been flagged for a verification call.");
+                      refresh();
+                    }}
+                  >
                     Request Follow-up
                   </AttentionBtn>
-                  <SecondaryBtn className="text-sm py-2" icon={<Archive className="w-3.5 h-3.5" />}>
-                    Mark Reviewed
+                  <SecondaryBtn
+                    className="text-sm py-2"
+                    icon={<Archive className="w-3.5 h-3.5" />}
+                    disabled={candidate.submissionStatus === "reviewed"}
+                    onClick={() => {
+                      if (candidate.submissionStatus === "reviewed") return;
+                      setSubmissionStatus(candidate.id, "reviewed");
+                      addAudit({
+                        action: "Marked Reviewed",
+                        user: report.reviewer,
+                        candidate: candidate.code,
+                        type: "review",
+                      });
+                      toast.success("Report marked as reviewed.");
+                      refresh();
+                    }}
+                  >
+                    {candidate.submissionStatus === "reviewed" ? "Already Reviewed" : "Mark Reviewed"}
                   </SecondaryBtn>
                 </div>
               </div>
             </div>
           </Card>
 
-          {report.reviewerNotes && (
+          {exportOpts.includeReviewerNotes && report.reviewerNotes && (
             <Card className="p-5">
               <SectionLabel>Reviewer Notes</SectionLabel>
               <div className="bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl p-4">
@@ -359,7 +537,7 @@ export default function TrustReportPage() {
             </Card>
           )}
 
-          <GuardrailNotice />
+          {exportOpts.includeGuardrailNotice && <GuardrailNotice />}
 
           <div className="flex items-center justify-between p-4 bg-[#172033] rounded-2xl print:hidden">
             <div className="text-white">
@@ -369,7 +547,7 @@ export default function TrustReportPage() {
               </p>
             </div>
             <button
-              onClick={onExport}
+              onClick={() => setShowExportModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-white text-[#172033] text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
             >
               <Download className="w-4 h-4" /> Export PDF
@@ -377,6 +555,72 @@ export default function TrustReportPage() {
           </div>
         </div>
       </div>
+      <ExportPdfModal
+        open={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        candidateName={candidate.name}
+        candidateCode={candidate.code}
+        onExport={runExport}
+      />
+      <ShareReportModal
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        candidate={candidate}
+        reviewer={report.reviewer}
+      />
     </div>
+  );
+}
+
+function OverviewStat({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div
+      className="border rounded-xl p-3 text-center"
+      style={{ borderColor: `${color}33`, backgroundColor: `${color}0d` }}
+    >
+      <p className="text-2xl font-bold" style={{ color }}>{value}</p>
+      <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function EvidenceCard({
+  row,
+  source,
+  timestamp,
+}: {
+  row: SignalRow;
+  source: string;
+  timestamp: string;
+}) {
+  return (
+    <Card className="p-4 hover:border-[#172033]/20 transition-colors">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">{row.area}</p>
+          <p className="text-sm font-semibold text-[#111827] truncate">{row.signal}</p>
+        </div>
+        <AttentionBadge level={row.status} />
+      </div>
+      <p className="text-xs text-[#374151] leading-relaxed">{row.evidence}</p>
+      {row.note && (
+        <div className="mt-2 px-3 py-2 bg-[#C6923A]/5 border border-[#C6923A]/20 rounded-lg">
+          <p className="text-[11px] text-[#8A6422] leading-relaxed">{row.note}</p>
+        </div>
+      )}
+      <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[10px] text-[#9CA3AF]">
+        <span className="font-mono">Source: {source}</span>
+        <span>{formatDateTime(timestamp)}</span>
+      </div>
+    </Card>
   );
 }

@@ -22,6 +22,8 @@ export type AuditType =
   | "consent"
   | "share";
 
+export type VerificationType = "full" | "identity-only" | "portfolio-only";
+
 export interface Candidate {
   id: string;
   code: string;
@@ -34,6 +36,10 @@ export interface Candidate {
   lastUpdated: string;
   reportReady: boolean;
   createdAt: string;
+  verificationType?: VerificationType;
+  dueDate?: string;
+  inviteNote?: string;
+  linkSent?: boolean;
 }
 
 export interface PortfolioLink {
@@ -133,4 +139,7 @@ export interface OrgSettings {
     reports: string;
     auditLogs: string;
   };
+  consentTemplate: string;
+  consentTemplateUpdatedAt?: string;
+  consentTemplateVersion?: string;
 }

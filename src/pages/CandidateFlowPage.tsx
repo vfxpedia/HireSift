@@ -278,7 +278,7 @@ function ConsentStep({
         <p className="text-sm text-[#6B7280]">
           Your submitted materials are stored for 90 days unless you request earlier deletion. You may
           contact{" "}
-          <a href="#" className="text-[#2F7D7E] hover:underline">
+          <a href="mailto:privacy@hiresift.com" className="text-[#2F7D7E] hover:underline">
             privacy@hiresift.com
           </a>{" "}
           at any time to request deletion or review.
@@ -577,7 +577,11 @@ function DocumentStep({
           />
         </div>
       ) : (
-        <Card className="p-4 mb-4">
+        <Card className="p-4 mb-4 border-[#2F7D7E]/30 bg-[#2F7D7E]/5">
+          <div className="flex items-center gap-1.5 text-xs text-[#2F7D7E] font-semibold mb-3">
+            <CheckCircle className="w-3.5 h-3.5" />
+            Uploaded successfully
+          </div>
           <div className="flex items-start gap-4">
             {asset.mimeType.startsWith("image/") ? (
               <img
@@ -586,7 +590,7 @@ function DocumentStep({
                 className="w-32 h-32 object-cover rounded-lg border border-[#E5E7EB]"
               />
             ) : (
-              <div className="w-32 h-32 bg-[#F7F8FA] rounded-lg border border-[#E5E7EB] flex items-center justify-center">
+              <div className="w-32 h-32 bg-white rounded-lg border border-[#E5E7EB] flex items-center justify-center">
                 <FileText className="w-10 h-10 text-[#6B7280]" />
               </div>
             )}
@@ -597,7 +601,7 @@ function DocumentStep({
               </p>
               <div className="mt-3 flex gap-2">
                 <SecondaryBtn onClick={() => setAsset(undefined)} className="text-xs py-1.5">
-                  Replace
+                  Replace file
                 </SecondaryBtn>
               </div>
             </div>

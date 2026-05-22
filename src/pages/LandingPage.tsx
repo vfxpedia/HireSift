@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Shield,
@@ -20,6 +21,8 @@ import { cn } from "../lib/cn";
 import { Card, SectionLabel } from "../components/primitives/Card";
 import { AttentionBadge } from "../components/primitives/Badges";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
+import { InfoModal } from "../components/modals/InfoModal";
+import { POLICIES } from "../lib/policies";
 
 const FEATURES = [
   { icon: User, title: "Identity Consistency Review", desc: "Organize submitted identity signals for structured human review." },
@@ -79,6 +82,8 @@ const SCOPE = {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [policy, setPolicy] = useState<keyof typeof POLICIES | null>(null);
+  const policyDoc = policy ? POLICIES[policy] : null;
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }} className="bg-white">
@@ -395,25 +400,46 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 text-sm text-white/50 mb-8">
             <div>
               <p className="text-white/80 font-medium mb-3">Product</p>
-              <div className="space-y-2">
-                <p>How it works</p>
-                <p>Trust Reports</p>
-                <p>Pricing</p>
+              <div className="space-y-2 flex flex-col items-start">
+                <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+                <button
+                  type="button"
+                  onClick={() => navigate("/app/reports")}
+                  className="hover:text-white transition-colors text-left"
+                >
+                  Trust Reports
+                </button>
+                <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
               </div>
             </div>
             <div>
               <p className="text-white/80 font-medium mb-3">Trust</p>
-              <div className="space-y-2">
-                <p>Privacy Policy</p>
-                <p>Data Retention</p>
-                <p>Guardrails</p>
+              <div className="space-y-2 flex flex-col items-start">
+                {(["privacy", "retention", "guardrails"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setPolicy(k)}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {POLICIES[k].title}
+                  </button>
+                ))}
               </div>
             </div>
             <div>
               <p className="text-white/80 font-medium mb-3">Company</p>
-              <div className="space-y-2">
-                <p>About</p>
-                <p>Contact</p>
+              <div className="space-y-2 flex flex-col items-start">
+                {(["about", "contact"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setPolicy(k)}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {POLICIES[k].title}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -422,6 +448,18 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <InfoModal
+        open={!!policy}
+        onClose={() => setPolicy(null)}
+        title={policyDoc?.title ?? ""}
+        body={
+          <>
+            {policyDoc?.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </>
+        }
+      />
     </div>
   );
 }

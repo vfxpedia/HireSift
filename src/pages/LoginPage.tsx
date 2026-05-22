@@ -4,11 +4,13 @@ import { Shield } from "lucide-react";
 import { Card } from "../components/primitives/Card";
 import { PrimaryBtn } from "../components/primitives/Buttons";
 import { Field, TextInput } from "../components/primitives/Field";
+import { InfoModal } from "../components/modals/InfoModal";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("sarah.chen@techcorp.com");
   const [password, setPassword] = useState("demo-password");
+  const [showForgot, setShowForgot] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +53,13 @@ export default function LoginPage() {
             </PrimaryBtn>
           </form>
           <p className="text-center text-xs text-[#9CA3AF]">
-            <a href="#" className="text-[#2F7D7E] hover:underline">
+            <button
+              type="button"
+              onClick={() => setShowForgot(true)}
+              className="text-[#2F7D7E] hover:underline"
+            >
               Forgot password?
-            </a>
+            </button>
           </p>
         </Card>
         <p className="text-center text-xs text-[#9CA3AF] mt-4">
@@ -62,6 +68,27 @@ export default function LoginPage() {
           </button>
         </p>
       </div>
+      <InfoModal
+        open={showForgot}
+        onClose={() => setShowForgot(false)}
+        title="Reset your password"
+        body={
+          <>
+            <p>
+              In the live product, you would receive a password reset email here. For this demo
+              prototype, please reach out to your organization admin or HireSift support.
+            </p>
+            <p>
+              <strong className="font-semibold">Demo admin:</strong> sarah.chen@techcorp.com
+              <br />
+              <strong className="font-semibold">Support:</strong>{" "}
+              <a className="text-[#2F7D7E] hover:underline" href="mailto:support@hiresift.com">
+                support@hiresift.com
+              </a>
+            </p>
+          </>
+        }
+      />
     </div>
   );
 }

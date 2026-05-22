@@ -1,4 +1,9 @@
-import type { Candidate, SubmissionStatus, AttentionLevel } from "../types";
+import type {
+  Candidate,
+  SubmissionStatus,
+  AttentionLevel,
+  VerificationType,
+} from "../types";
 import { db } from "./db";
 import { formatDate, nextCandidateCode, uid } from "../lib/format";
 import { addAudit } from "./audit";
@@ -8,6 +13,9 @@ export interface CreateCandidateInput {
   email: string;
   role: string;
   reviewer?: string;
+  verificationType?: VerificationType;
+  dueDate?: string;
+  inviteNote?: string;
 }
 
 export function listCandidates(): Candidate[] {
@@ -37,6 +45,10 @@ export function createCandidate(input: CreateCandidateInput): Candidate {
     lastUpdated: formatDate(),
     reportReady: false,
     createdAt: new Date().toISOString(),
+    verificationType: input.verificationType ?? "full",
+    dueDate: input.dueDate,
+    inviteNote: input.inviteNote,
+    linkSent: false,
   };
   db.setCandidates([c, ...list]);
   addAudit({
@@ -68,6 +80,10 @@ export function setAttention(id: string, level: AttentionLevel): Candidate | und
 
 export function setReportReady(id: string, ready: boolean): Candidate | undefined {
   return updateCandidate(id, { reportReady: ready, submissionStatus: ready ? "report-ready" : "reviewed" });
+}
+
+export function markLinkSent(id: string): Candidate | undefined {
+  return updateCandidate(id, { linkSent: true });
 }
 
 export function dashboardStats() {

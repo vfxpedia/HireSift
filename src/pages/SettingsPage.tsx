@@ -4,8 +4,11 @@ import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
 import { inputClass } from "../components/primitives/Field";
+import { EditTemplateModal } from "../components/modals/EditTemplateModal";
 import { cn } from "../lib/cn";
 import { db } from "../api/db";
+import { toast } from "../components/primitives/Toaster";
+import { formatDate } from "../lib/format";
 import type { OrgSettings } from "../types";
 
 const RETENTION_OPTIONS = ["30 days", "60 days", "90 days", "180 days", "1 year", "2 years"];
@@ -14,6 +17,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"org" | "retention" | "consent">("org");
   const [org, setOrg] = useState<OrgSettings>(db.getOrg());
   const [savedTick, setSavedTick] = useState(false);
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
 
   const updateOrg = (patch: Partial<OrgSettings>) => setOrg({ ...org, ...patch });
   const updateRetention = (key: keyof OrgSettings["retention"], value: string) =>
@@ -23,6 +27,19 @@ export default function SettingsPage() {
     db.setOrg(org);
     setSavedTick(true);
     setTimeout(() => setSavedTick(false), 1500);
+    toast.success("Settings saved.");
+  };
+
+  const saveTemplate = (next: string) => {
+    const updated: OrgSettings = {
+      ...org,
+      consentTemplate: next,
+      consentTemplateUpdatedAt: new Date().toISOString(),
+      consentTemplateVersion: bumpVersion(org.consentTemplateVersion),
+    };
+    setOrg(updated);
+    db.setOrg(updated);
+    toast.success("Consent template updated.");
   };
 
   const tabs = [
@@ -169,36 +186,36 @@ export default function SettingsPage() {
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-sm text-[#111827]">Consent Template</h3>
-                <SecondaryBtn className="text-xs py-1.5">Edit template</SecondaryBtn>
+                <SecondaryBtn className="text-xs py-1.5" onClick={() => setShowTemplateEditor(true)}>
+                  Edit template
+                </SecondaryBtn>
               </div>
-              <div className="bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl p-4 text-sm text-[#374151] leading-relaxed space-y-3">
-                <p>
-                  <strong className="font-semibold">HireSift Verification Consent</strong>
-                </p>
-                <p>
-                  HireSift helps the hiring team review identity and portfolio consistency in remote
-                  hiring. This process does not automatically determine your hiring result.
-                </p>
-                <p>
-                  Your submitted information is used only for verification review and will be handled
-                  according to the stated retention policy. You may request deletion at any time.
-                </p>
-                <p>
-                  <strong>What is collected:</strong> Basic information, portfolio links, masked document,
-                  selfie video sample, voice sample.
-                </p>
-                <p>
-                  <strong>What is NOT done:</strong> Automatic rejection, lie detection, emotion
-                  analysis, biometric profiling.
-                </p>
+              <pre className="bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl p-4 text-sm text-[#374151] leading-relaxed whitespace-pre-wrap font-sans">
+                {org.consentTemplate}
+              </pre>
+              <div className="mt-3 text-xs text-[#9CA3AF]">
+                Last updated:{" "}
+                {org.consentTemplateUpdatedAt ? formatDate(org.consentTemplateUpdatedAt) : "—"} · Version{" "}
+                {org.consentTemplateVersion ?? "1.0"}
               </div>
-              <div className="mt-3 text-xs text-[#9CA3AF]">Last updated: May 21, 2026 · Version 1.2</div>
             </Card>
           )}
         </div>
       </div>
+      <EditTemplateModal
+        open={showTemplateEditor}
+        onClose={() => setShowTemplateEditor(false)}
+        initialValue={org.consentTemplate}
+        onSave={saveTemplate}
+      />
     </div>
   );
+}
+
+function bumpVersion(v?: string): string {
+  if (!v) return "1.0";
+  const [major, minor] = v.split(".").map((n) => parseInt(n, 10) || 0);
+  return `${major}.${minor + 1}`;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

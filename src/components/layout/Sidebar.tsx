@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router";
 import {
   Shield,
@@ -10,8 +11,13 @@ import {
   Building,
   ChevronDown,
   LogOut,
+  Check,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { Popover } from "../primitives/Popover";
+import { ORGANIZATIONS, getCurrentOrgId, setCurrentOrgId } from "../../lib/orgContext";
+import { toast } from "../primitives/Toaster";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: BarChart2, to: "/app/dashboard", group: "Overview" },
@@ -20,12 +26,22 @@ const NAV_ITEMS = [
   { label: "Trust Reports", icon: FileText, to: "/app/reports", group: "Reports" },
   { label: "Settings", icon: Settings, to: "/app/settings", group: "Admin" },
   { label: "Audit Log", icon: BookOpen, to: "/app/audit-log", group: "Admin" },
+  { label: "Checklist", icon: ListChecks, to: "/app/checklist", group: "Admin" },
 ];
 
 const GROUPS = ["Overview", "Hiring", "Reports", "Admin"];
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const [currentId, setCurrentId] = useState(getCurrentOrgId());
+  const current = ORGANIZATIONS.find((o) => o.id === currentId) ?? ORGANIZATIONS[0];
+
+  const switchOrg = (id: string) => {
+    setCurrentOrgId(id);
+    setCurrentId(id);
+    const next = ORGANIZATIONS.find((o) => o.id === id);
+    if (next) toast.success(`Switched to ${next.name}`);
+  };
 
   return (
     <aside className="w-60 bg-[#172033] flex flex-col h-full shrink-0">
@@ -42,11 +58,44 @@ export function Sidebar() {
       </div>
 
       <div className="px-4 py-3 border-b border-white/10">
-        <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
-          <Building className="w-3.5 h-3.5 text-white/40" />
-          <span className="text-white/60 text-xs">TechCorp Hiring</span>
-          <ChevronDown className="w-3 h-3 text-white/30 ml-auto" />
-        </div>
+        <Popover
+          align="start"
+          trigger={
+            <button
+              type="button"
+              className="w-full flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 hover:bg-white/10 transition-colors"
+            >
+              <Building className="w-3.5 h-3.5 text-white/40" />
+              <span className="text-white/70 text-xs flex-1 text-left truncate">{current.name}</span>
+              <ChevronDown className="w-3 h-3 text-white/30" />
+            </button>
+          }
+        >
+          <div className="min-w-56">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+              Switch organization
+            </p>
+            <div className="space-y-1">
+              {ORGANIZATIONS.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => switchOrg(o.id)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left hover:bg-[#F7F8FA]",
+                    o.id === current.id && "bg-[#F7F8FA]",
+                  )}
+                >
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-[#111827]">{o.name}</p>
+                    <p className="text-[10px] text-[#9CA3AF] capitalize">{o.type} · {o.seats} seats</p>
+                  </div>
+                  {o.id === current.id && <Check className="w-3.5 h-3.5 text-[#2F7D7E]" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Popover>
       </div>
 
       <nav className="flex-1 px-3 py-4 overflow-y-auto">

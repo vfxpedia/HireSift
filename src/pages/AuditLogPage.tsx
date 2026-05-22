@@ -1,10 +1,21 @@
 import { useMemo, useState } from "react";
-import { Download, Filter, Search, Lock } from "lucide-react";
+import { Download, Filter, Search, Lock, X } from "lucide-react";
 import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
 import { SecondaryBtn } from "../components/primitives/Buttons";
+import { Popover } from "../components/primitives/Popover";
 import { cn } from "../lib/cn";
 import { listAudit } from "../api/audit";
+import type { AuditType } from "../types";
+
+const TYPE_OPTIONS: { value: AuditType; label: string }[] = [
+  { value: "report", label: "Report" },
+  { value: "review", label: "Review" },
+  { value: "submission", label: "Submission" },
+  { value: "request", label: "Request" },
+  { value: "consent", label: "Consent" },
+  { value: "share", label: "Share" },
+];
 
 const TYPE_COLOR: Record<string, string> = {
   report: "bg-[#172033]/10 text-[#172033]",
@@ -17,17 +28,26 @@ const TYPE_COLOR: Record<string, string> = {
 
 export default function AuditLogPage() {
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<Set<AuditType>>(new Set());
   const entries = listAudit();
   const filtered = useMemo(
     () =>
-      entries.filter(
-        (e) =>
+      entries.filter((e) => {
+        const matchesSearch =
           e.action.toLowerCase().includes(search.toLowerCase()) ||
           e.user.toLowerCase().includes(search.toLowerCase()) ||
-          e.candidate.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [entries, search],
+          e.candidate.toLowerCase().includes(search.toLowerCase());
+        const matchesType = typeFilter.size === 0 || typeFilter.has(e.type);
+        return matchesSearch && matchesType;
+      }),
+    [entries, search, typeFilter],
   );
+
+  const toggleType = (v: AuditType) => {
+    const next = new Set(typeFilter);
+    next.has(v) ? next.delete(v) : next.add(v);
+    setTypeFilter(next);
+  };
 
   const exportLog = () => {
     const headers = ["id", "action", "type", "user", "candidate", "time"];
@@ -67,9 +87,55 @@ export default function AuditLogPage() {
                 className="w-full pl-9 pr-4 py-2 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30"
               />
             </div>
-            <SecondaryBtn className="text-sm py-2" icon={<Filter className="w-3.5 h-3.5" />}>
-              Filter
-            </SecondaryBtn>
+            <Popover
+              trigger={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50",
+                    typeFilter.size > 0
+                      ? "border-[#2F7D7E] text-[#2F7D7E] bg-[#2F7D7E]/5"
+                      : "border-[#E5E7EB] text-[#6B7280]",
+                  )}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  Filter
+                  {typeFilter.size > 0 && (
+                    <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2F7D7E] text-white text-[10px] font-semibold">
+                      {typeFilter.size}
+                    </span>
+                  )}
+                </button>
+              }
+            >
+              <div className="space-y-3 min-w-48">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
+                  Filter by type
+                </p>
+                <div className="space-y-1.5">
+                  {TYPE_OPTIONS.map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+                      <input
+                        type="checkbox"
+                        checked={typeFilter.has(opt.value)}
+                        onChange={() => toggleType(opt.value)}
+                        className="accent-[#2F7D7E] w-3.5 h-3.5"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+                {typeFilter.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setTypeFilter(new Set())}
+                    className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#374151]"
+                  >
+                    <X className="w-3 h-3" /> Clear
+                  </button>
+                )}
+              </div>
+            </Popover>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">

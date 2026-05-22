@@ -71,6 +71,16 @@ export const SEED_REPORTS: TrustReport[] = [
   },
 ];
 
+export const DEFAULT_CONSENT_TEMPLATE = `HireSift Verification Consent
+
+HireSift helps the hiring team review identity and portfolio consistency in remote hiring. This process does not automatically determine your hiring result.
+
+Your submitted information is used only for verification review and will be handled according to the stated retention policy. You may request deletion at any time.
+
+What is collected: Basic information, portfolio links, masked document, selfie video sample, voice sample.
+
+What is NOT done: Automatic rejection, lie detection, emotion analysis, biometric profiling.`;
+
 export const SEED_ORG: OrgSettings = {
   name: "TechCorp Hiring",
   contactEmail: "hiring@techcorp.com",
@@ -81,6 +91,9 @@ export const SEED_ORG: OrgSettings = {
     reports: "1 year",
     auditLogs: "2 years",
   },
+  consentTemplate: DEFAULT_CONSENT_TEMPLATE,
+  consentTemplateUpdatedAt: "2026-05-21T00:00:00Z",
+  consentTemplateVersion: "1.2",
 };
 
 export const WEEKLY_DATA = [

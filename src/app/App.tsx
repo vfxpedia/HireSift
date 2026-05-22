@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AppLayout } from "../components/layout/AppLayout";
+import { Toaster } from "../components/primitives/Toaster";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
@@ -9,10 +10,13 @@ import TrustReportPage from "../pages/TrustReportPage";
 import SettingsPage from "../pages/SettingsPage";
 import AuditLogPage from "../pages/AuditLogPage";
 import CandidateFlowPage from "../pages/CandidateFlowPage";
+import CandidateDetailPage from "../pages/CandidateDetailPage";
+import ChecklistPage from "../pages/ChecklistPage";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -24,13 +28,14 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="candidates" element={<CandidatesPage />} />
-          <Route path="candidates/:candidateId" element={<ReviewerPage />} />
+          <Route path="candidates/:candidateId" element={<CandidateDetailPage />} />
           <Route path="reviewer" element={<ReviewerPage />} />
           <Route path="reviewer/:candidateId" element={<ReviewerPage />} />
           <Route path="reports" element={<TrustReportPage />} />
           <Route path="reports/:candidateId" element={<TrustReportPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="audit-log" element={<AuditLogPage />} />
+          <Route path="checklist" element={<ChecklistPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

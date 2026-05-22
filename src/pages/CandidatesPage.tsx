@@ -9,14 +9,32 @@ import {
   Filter,
   Copy,
   Check,
+  X,
 } from "lucide-react";
 import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
 import { PrimaryBtn } from "../components/primitives/Buttons";
 import { AttentionBadge, StatusBadge } from "../components/primitives/Badges";
+import { Popover } from "../components/primitives/Popover";
 import { CreateVerificationModal } from "../components/modals/CreateVerificationModal";
 import { listCandidates } from "../api/candidates";
-import type { Candidate } from "../types";
+import type { Candidate, AttentionLevel, SubmissionStatus } from "../types";
+import { cn } from "../lib/cn";
+
+const STATUS_OPTIONS: { value: SubmissionStatus; label: string }[] = [
+  { value: "pending", label: "Pending" },
+  { value: "in-progress", label: "In Progress" },
+  { value: "submitted", label: "Submitted" },
+  { value: "reviewed", label: "Reviewed" },
+  { value: "report-ready", label: "Report Ready" },
+];
+
+const ATTENTION_OPTIONS: { value: AttentionLevel; label: string }[] = [
+  { value: "low", label: "Low Attention" },
+  { value: "medium", label: "Review Recommended" },
+  { value: "high", label: "High Attention" },
+  { value: "manual", label: "Manual Review" },
+];
 
 export default function CandidatesPage() {
   const navigate = useNavigate();
@@ -24,18 +42,39 @@ export default function CandidatesPage() {
   const [showModal, setShowModal] = useState(false);
   const [tick, setTick] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Set<SubmissionStatus>>(new Set());
+  const [attentionFilter, setAttentionFilter] = useState<Set<AttentionLevel>>(new Set());
   void tick;
 
   const candidates = listCandidates();
   const filtered = useMemo(
     () =>
-      candidates.filter(
-        (c) =>
+      candidates.filter((c) => {
+        const matchesSearch =
           c.name.toLowerCase().includes(search.toLowerCase()) ||
-          c.code.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [candidates, search],
+          c.code.toLowerCase().includes(search.toLowerCase());
+        const matchesStatus = statusFilter.size === 0 || statusFilter.has(c.submissionStatus);
+        const matchesAttention = attentionFilter.size === 0 || attentionFilter.has(c.attentionLevel);
+        return matchesSearch && matchesStatus && matchesAttention;
+      }),
+    [candidates, search, statusFilter, attentionFilter],
   );
+
+  const toggleStatus = (value: SubmissionStatus) => {
+    const next = new Set(statusFilter);
+    next.has(value) ? next.delete(value) : next.add(value);
+    setStatusFilter(next);
+  };
+  const toggleAttention = (value: AttentionLevel) => {
+    const next = new Set(attentionFilter);
+    next.has(value) ? next.delete(value) : next.add(value);
+    setAttentionFilter(next);
+  };
+  const clearFilters = () => {
+    setStatusFilter(new Set());
+    setAttentionFilter(new Set());
+  };
+  const activeFilterCount = statusFilter.size + attentionFilter.size;
 
   const copyLink = async (c: Candidate) => {
     try {
@@ -74,10 +113,75 @@ export default function CandidatesPage() {
                 className="w-full pl-9 pr-4 py-2 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30 focus:border-[#2F7D7E]"
               />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#6B7280] border border-[#E5E7EB] rounded-lg hover:bg-gray-50">
-              <Filter className="w-3.5 h-3.5" />
-              Filter
-            </button>
+            <Popover
+              trigger={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50",
+                    activeFilterCount > 0
+                      ? "border-[#2F7D7E] text-[#2F7D7E] bg-[#2F7D7E]/5"
+                      : "border-[#E5E7EB] text-[#6B7280]",
+                  )}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  Filter
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2F7D7E] text-white text-[10px] font-semibold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              }
+            >
+              <div className="space-y-4 min-w-60">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+                    Submission status
+                  </p>
+                  <div className="space-y-1.5">
+                    {STATUS_OPTIONS.map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+                        <input
+                          type="checkbox"
+                          checked={statusFilter.has(opt.value)}
+                          onChange={() => toggleStatus(opt.value)}
+                          className="accent-[#2F7D7E] w-3.5 h-3.5"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+                    Attention level
+                  </p>
+                  <div className="space-y-1.5">
+                    {ATTENTION_OPTIONS.map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+                        <input
+                          type="checkbox"
+                          checked={attentionFilter.has(opt.value)}
+                          onChange={() => toggleAttention(opt.value)}
+                          className="accent-[#2F7D7E] w-3.5 h-3.5"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#374151]"
+                  >
+                    <X className="w-3 h-3" /> Clear all
+                  </button>
+                )}
+              </div>
+            </Popover>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -119,7 +223,15 @@ export default function CandidatesPage() {
                     </td>
                     <td className="px-4 py-3.5 text-sm text-[#374151] whitespace-nowrap">{c.role}</td>
                     <td className="px-4 py-3.5">
-                      <StatusBadge status={c.submissionStatus} />
+                      <div className="flex flex-col items-start gap-1">
+                        <StatusBadge status={c.submissionStatus} />
+                        {c.submissionStatus === "pending" && c.linkSent && (
+                          <span className="text-[10px] text-[#2F7D7E] flex items-center gap-1">
+                            <Check className="w-2.5 h-2.5" />
+                            Link Sent
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3.5">
                       {c.submissionStatus !== "pending" ? (
