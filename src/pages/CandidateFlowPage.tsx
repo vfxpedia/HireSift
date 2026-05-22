@@ -459,6 +459,8 @@ function BasicInfoStep({
     handleSubmit,
     formState: { errors },
   } = useForm<BasicInfo>({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       fullName: existing?.fullName ?? defaultName,
       email: existing?.email ?? defaultEmail,

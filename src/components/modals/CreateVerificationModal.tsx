@@ -54,6 +54,8 @@ export function CreateVerificationModal({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       email: "",

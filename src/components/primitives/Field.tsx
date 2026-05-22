@@ -29,14 +29,18 @@ export function Field({ label, hint, error, optional, children }: FieldProps) {
 export const inputClass =
   "w-full px-3 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30 focus:border-[#2F7D7E]";
 
-export function TextInput(
-  props: React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean },
-) {
-  const { className, error, ...rest } = props;
-  return (
+type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean };
+
+// `forwardRef` is required so react-hook-form's `register()` ref reaches the
+// underlying <input>. Without it the form state can't read the input's value
+// and every required field flashes "Required" even when populated.
+export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
+  ({ className, error, ...rest }, ref) => (
     <input
+      ref={ref}
       {...rest}
       className={cn(inputClass, error && "border-[#C6923A] focus:ring-[#C6923A]/30", className)}
     />
-  );
-}
+  ),
+);
+TextInput.displayName = "TextInput";
