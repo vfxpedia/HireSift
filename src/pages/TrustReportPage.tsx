@@ -29,10 +29,27 @@ import { toast } from "../components/primitives/Toaster";
 import { useEffect, useState } from "react";
 import { ExportPdfModal, type ExportOptions } from "../components/modals/ExportPdfModal";
 import { ShareReportModal } from "../components/modals/ShareReportModal";
-import type { AttentionLevel, SignalRow } from "../types";
+import { useTranslation } from "react-i18next";
+import type { AttentionLevel, SignalRow, RecommendedAction } from "../types";
+
+function actionTKey(a: RecommendedAction): string {
+  switch (a) {
+    case "no-action":
+      return "noAction";
+    case "verification-call":
+      return "verificationCall";
+    case "portfolio-walkthrough":
+      return "portfolioWalkthrough";
+    case "additional-doc":
+      return "additionalDoc";
+    case "manual-review":
+      return "manualReview";
+  }
+}
 
 export default function TrustReportPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId?: string }>();
   const reports = listReports();
 
@@ -56,13 +73,11 @@ export default function TrustReportPage() {
   if (!candidate || !report) {
     return (
       <div className="flex flex-col h-full overflow-hidden">
-        <TopBar title="Candidate Trust Report" subtitle="No reports yet" />
+        <TopBar title={t("report.title")} subtitle={t("report.subtitleNoReports")} />
         <div className="flex-1 flex items-center justify-center p-6">
           <Card className="p-8 text-center max-w-sm">
-            <p className="text-sm text-[#6B7280] mb-4">
-              No trust report has been generated yet. Review a candidate and click "Generate Trust Report".
-            </p>
-            <PrimaryBtn onClick={() => navigate("/app/reviewer")}>Go to Reviewer</PrimaryBtn>
+            <p className="text-sm text-[#6B7280] mb-4">{t("report.noReportsBody")}</p>
+            <PrimaryBtn onClick={() => navigate("/app/reviewer")}>{t("report.goToReviewer")}</PrimaryBtn>
           </Card>
         </div>
       </div>
@@ -110,36 +125,36 @@ export default function TrustReportPage() {
 
   const summaryCards = [
     {
-      label: "Identity Consistency",
+      label: t("report.identityConsistency"),
       level: report.summary.identity,
-      note: "Name and document signals are consistent.",
+      note: t("report.summaryNotes.identity"),
     },
     {
-      label: "Portfolio Provenance",
+      label: t("report.portfolioProvenance"),
       level: report.summary.portfolio,
-      note: "Portfolio account activity reviewed.",
+      note: t("report.summaryNotes.portfolio"),
     },
     {
-      label: "Interview Session Integrity",
+      label: t("report.interviewSessionIntegrity"),
       level: report.summary.session,
-      note: "Session media quality is consistent and clear.",
+      note: t("report.summaryNotes.session"),
     },
     {
-      label: "Media Sample Quality",
+      label: t("report.mediaSampleQuality"),
       level: report.summary.mediaQuality,
-      note: "Selfie and voice samples meet quality threshold.",
+      note: t("report.summaryNotes.mediaQuality"),
     },
     {
-      label: "Manual Review Status",
+      label: t("report.manualReviewStatus"),
       level: report.summary.manualReview,
-      note: report.recommendedActionTitle,
+      note: t(`actionTitles.${actionTKey(report.recommendedAction)}`),
     },
   ];
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Candidate Trust Report"
+        title={t("report.title")}
         subtitle={`${candidate.name} · ${candidate.code}`}
         actions={
           <div className="flex items-center gap-2">
@@ -148,14 +163,14 @@ export default function TrustReportPage() {
               className="text-sm py-2"
               icon={<Share2 className="w-4 h-4" />}
             >
-              Share
+              {t("report.share")}
             </SecondaryBtn>
             <PrimaryBtn
               onClick={() => setShowExportModal(true)}
               className="text-sm py-2"
               icon={<Download className="w-4 h-4" />}
             >
-              Export PDF
+              {t("report.exportPdf")}
             </PrimaryBtn>
           </div>
         }
@@ -171,7 +186,7 @@ export default function TrustReportPage() {
                   </div>
                   <div>
                     <p className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider">
-                      Candidate Trust Report
+                      {t("report.header.label")}
                     </p>
                     <p className="text-xs text-[#9CA3AF] font-mono">{candidate.code}</p>
                   </div>
@@ -182,17 +197,17 @@ export default function TrustReportPage() {
               <div className="text-right">
                 <div className="flex items-center gap-1.5 bg-[#2F7D7E]/10 text-[#2F7D7E] text-xs font-semibold px-3 py-1.5 rounded-lg mb-2">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  Human Reviewed
+                  {t("report.header.humanReviewed")}
                 </div>
                 <StatusBadge status="report-ready" />
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-[#E5E7EB] pt-4">
               {[
-                { label: "Organization", value: "TechCorp Hiring" },
-                { label: "Verification Date", value: formatDate(report.generatedAt) },
-                { label: "Reviewer", value: report.reviewer },
-                { label: "Report Status", value: "Final" },
+                { label: t("report.header.organization"), value: "TechCorp Hiring" },
+                { label: t("report.header.verificationDate"), value: formatDate(report.generatedAt) },
+                { label: t("report.header.reviewer"), value: report.reviewer },
+                { label: t("report.header.reportStatus"), value: t("report.header.final") },
               ].map((f) => (
                 <div key={f.label}>
                   <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider mb-0.5">
@@ -205,7 +220,7 @@ export default function TrustReportPage() {
           </Card>
 
           <div>
-            <SectionLabel>Verification Summary</SectionLabel>
+            <SectionLabel>{t("report.verificationSummary")}</SectionLabel>
             <div className="grid md:grid-cols-5 gap-3">
               {summaryCards.map((c) => (
                 <Card
@@ -224,18 +239,18 @@ export default function TrustReportPage() {
           <Card className="p-5">
             <div className="grid md:grid-cols-3 gap-5">
               <div>
-                <SectionLabel>Signal Overview</SectionLabel>
+                <SectionLabel>{t("report.signalOverview")}</SectionLabel>
                 <div className="grid grid-cols-3 gap-2 -mt-1">
-                  <OverviewStat label="Low" value={lowCount} color="#2F7D7E" />
-                  <OverviewStat label="Review" value={reviewCount} color="#C6923A" />
-                  <OverviewStat label="Manual" value={manualCount} color="#172033" />
+                  <OverviewStat label={t("report.overviewLow")} value={lowCount} color="#2F7D7E" />
+                  <OverviewStat label={t("report.overviewReview")} value={reviewCount} color="#C6923A" />
+                  <OverviewStat label={t("report.overviewManual")} value={manualCount} color="#172033" />
                 </div>
                 <p className="text-[11px] text-[#9CA3AF] mt-3">
-                  {totalSignals} signals organized across {sectionStatuses.length} candidate sections.
+                  {t("report.overviewFooter", { count: totalSignals, sections: sectionStatuses.length })}
                 </p>
               </div>
               <div>
-                <SectionLabel>Attention Distribution</SectionLabel>
+                <SectionLabel>{t("report.attentionDistribution")}</SectionLabel>
                 <div className="-mt-1">
                   <div className="flex w-full h-3 rounded-full overflow-hidden bg-[#F3F4F6]">
                     {totalSignals > 0 && (
@@ -247,19 +262,19 @@ export default function TrustReportPage() {
                     )}
                   </div>
                   <div className="flex justify-between mt-2 text-[10px] text-[#6B7280]">
-                    <Legend color="#2F7D7E" label="Low" />
-                    <Legend color="#C6923A" label="Review" />
-                    <Legend color="#172033" label="Manual" />
+                    <Legend color="#2F7D7E" label={t("report.overviewLow")} />
+                    <Legend color="#C6923A" label={t("report.overviewReview")} />
+                    <Legend color="#172033" label={t("report.overviewManual")} />
                   </div>
                 </div>
               </div>
               <div>
-                <SectionLabel>Section Completion</SectionLabel>
+                <SectionLabel>{t("report.sectionCompletion")}</SectionLabel>
                 <div className="-mt-1">
                   <div className="flex items-baseline gap-1.5 mb-2">
                     <span className="text-2xl font-bold text-[#111827]">{completionPct}%</span>
                     <span className="text-xs text-[#6B7280]">
-                      ({completedCount}/{sectionStatuses.length} sections)
+                      {t("report.completionLabel", { percent: completionPct, done: completedCount, total: sectionStatuses.length })}
                     </span>
                   </div>
                   <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden mb-3">
@@ -290,15 +305,21 @@ export default function TrustReportPage() {
 
           <Card>
             <div className="px-5 py-4 border-b border-[#E5E7EB]">
-              <SectionLabel>Signal Matrix</SectionLabel>
-              <p className="text-sm font-semibold text-[#111827] -mt-1">Review Signal Detail</p>
+              <SectionLabel>{t("report.signalMatrix")}</SectionLabel>
+              <p className="text-sm font-semibold text-[#111827] -mt-1">{t("report.signalMatrixDetail")}</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                    {["Area", "Signal", "Status", "Evidence", "Reviewer Note"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
+                    {[
+                      t("reviewer.matrixCol.area"),
+                      t("reviewer.matrixCol.signal"),
+                      t("reviewer.matrixCol.status"),
+                      t("reviewer.matrixCol.evidence"),
+                      t("reviewer.matrixCol.note"),
+                    ].map((h, i) => (
+                      <th key={i} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
                         {h}
                       </th>
                     ))}
@@ -326,7 +347,7 @@ export default function TrustReportPage() {
           {/* Evidence Card Grid */}
           {exportOpts.includeEvidenceCards && (
             <div>
-              <SectionLabel>Evidence Cards</SectionLabel>
+              <SectionLabel>{t("report.evidenceCards")}</SectionLabel>
               <div className="grid md:grid-cols-2 gap-3">
                 {report.signalMatrix.map((row, i) => (
                   <EvidenceCard
@@ -341,11 +362,11 @@ export default function TrustReportPage() {
           )}
 
           <Card className="p-5">
-            <SectionLabel>Portfolio Provenance</SectionLabel>
-            <p className="text-sm font-semibold text-[#111827] mb-4 -mt-1">Portfolio Account Review</p>
+            <SectionLabel>{t("report.portfolioProvenance")}</SectionLabel>
+            <p className="text-sm font-semibold text-[#111827] mb-4 -mt-1">{t("report.portfolioReviewTitle")}</p>
             {report.portfolio.length > 0 && (
               <div className="mb-5 pb-5 border-b border-[#E5E7EB]">
-                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF] mb-3">Account timeline</p>
+                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF] mb-3">{t("report.accountTimeline")}</p>
                 <div className="relative pl-3">
                   <div className="absolute left-1 top-2 bottom-2 w-px bg-[#E5E7EB]" />
                   {report.portfolio.map((p) => (
@@ -361,7 +382,7 @@ export default function TrustReportPage() {
                         <p className="text-xs font-semibold text-[#374151]">{p.platform}</p>
                         <p className="text-[11px] text-[#9CA3AF] font-mono">{p.url}</p>
                         <p className="text-[10px] text-[#6B7280] mt-0.5">
-                          Account age: <strong className="text-[#374151]">{p.age}</strong> · {p.activity}
+                          {t("report.fieldAccountAge")}: <strong className="text-[#374151]">{p.age}</strong> · {p.activity}
                         </p>
                       </div>
                     </div>
@@ -386,17 +407,17 @@ export default function TrustReportPage() {
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-3">
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
-                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">Account age</p>
+                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldAccountAge")}</p>
                       <p className="text-xs font-medium text-[#374151]">{p.age}</p>
                     </div>
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
-                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">Activity</p>
+                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldActivity")}</p>
                       <p className="text-xs font-medium text-[#374151]">{p.activity}</p>
                     </div>
                     <div className="bg-[#F7F8FA] rounded-lg p-2.5">
-                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">Reviewer note</p>
+                      <p className="text-[10px] text-[#9CA3AF] mb-0.5">{t("report.fieldReviewerNote")}</p>
                       <p className="text-xs text-[#C6923A]">
-                        {p.note || <span className="text-[#9CA3AF]">None</span>}
+                        {p.note || <span className="text-[#9CA3AF]">{t("report.fieldNoteEmpty")}</span>}
                       </p>
                     </div>
                   </div>
@@ -406,37 +427,28 @@ export default function TrustReportPage() {
           </Card>
 
           <Card className="p-5">
-            <SectionLabel>Interview Session Integrity</SectionLabel>
-            <p className="text-sm font-semibold text-[#111827] mb-4 -mt-1">Session Signal Review</p>
+            <SectionLabel>{t("report.interviewSessionIntegrity")}</SectionLabel>
+            <p className="text-sm font-semibold text-[#111827] mb-4 -mt-1">{t("report.sessionTitle")}</p>
             <div className="grid md:grid-cols-2 gap-4">
               {[
                 {
-                  label: "Session completed",
-                  value: `Yes — ${formatDate(report.generatedAt)}`,
+                  label: t("report.session.completed"),
+                  value: t("report.session.completedValue", { date: formatDate(report.generatedAt) }),
                   icon: <CheckCircle className="w-4 h-4 text-[#2F7D7E]" />,
                 },
                 {
-                  label: "Selfie video quality",
-                  value:
-                    report.summary.mediaQuality === "low"
-                      ? "Clear · meets threshold"
-                      : "Sample missing",
+                  label: t("report.session.selfieQuality"),
+                  value: report.summary.mediaQuality === "low" ? t("report.session.selfieClear") : t("report.session.selfieMissing"),
                   icon: <Video className="w-4 h-4 text-[#2F7D7E]" />,
                 },
                 {
-                  label: "Face consistency signal",
-                  value:
-                    report.summary.session === "low"
-                      ? "Consistent · Low Attention"
-                      : "Needs reviewer attention",
+                  label: t("report.session.faceConsistency"),
+                  value: report.summary.session === "low" ? t("report.session.faceConsistent") : t("report.session.faceNeedsAttention"),
                   icon: <User className="w-4 h-4 text-[#2F7D7E]" />,
                 },
                 {
-                  label: "Voice consistency signal",
-                  value:
-                    report.summary.mediaQuality === "low"
-                      ? "Clear · Low Attention"
-                      : "Needs reviewer attention",
+                  label: t("report.session.voiceConsistency"),
+                  value: report.summary.mediaQuality === "low" ? t("report.session.voiceClear") : t("report.session.voiceNeedsAttention"),
                   icon: <Mic className="w-4 h-4 text-[#2F7D7E]" />,
                 },
               ].map((item) => (
@@ -457,8 +469,7 @@ export default function TrustReportPage() {
             <div className="mt-3 p-3 bg-[#F7F8FA] rounded-xl">
               <p className="text-xs text-[#6B7280]">
                 <Info className="w-3 h-3 inline mr-1" />
-                No emotion analysis, personality analysis, or biometric profiling was performed on session
-                media.
+                {t("report.session.noEmotion")}
               </p>
             </div>
           </Card>
@@ -469,12 +480,12 @@ export default function TrustReportPage() {
                 <ClipboardCheck className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1">
-                <SectionLabel>Recommended Action</SectionLabel>
+                <SectionLabel>{t("report.recommendedAction")}</SectionLabel>
                 <h3 className="text-base font-bold text-[#172033] mb-2">
-                  {report.recommendedActionTitle}
+                  {t(`actionTitles.${actionTKey(report.recommendedAction)}`)}
                 </h3>
                 <p className="text-sm text-[#6B7280] leading-relaxed mb-3">
-                  {report.recommendedActionDetail}
+                  {t(`actionDetails.${actionTKey(report.recommendedAction)}`)}
                 </p>
                 <div className="flex gap-2.5 print:hidden">
                   <AttentionBtn
@@ -488,11 +499,11 @@ export default function TrustReportPage() {
                         candidate: candidate.code,
                         type: "review",
                       });
-                      toast.success("Follow-up requested — candidate has been flagged for a verification call.");
+                      toast.success(t("report.followupToast"));
                       refresh();
                     }}
                   >
-                    Request Follow-up
+                    {t("report.actionFollowup")}
                   </AttentionBtn>
                   <SecondaryBtn
                     className="text-sm py-2"
@@ -507,11 +518,11 @@ export default function TrustReportPage() {
                         candidate: candidate.code,
                         type: "review",
                       });
-                      toast.success("Report marked as reviewed.");
+                      toast.success(t("report.reviewedToast"));
                       refresh();
                     }}
                   >
-                    {candidate.submissionStatus === "reviewed" ? "Already Reviewed" : "Mark Reviewed"}
+                    {candidate.submissionStatus === "reviewed" ? t("report.actionAlreadyReviewed") : t("report.actionMarkReviewed")}
                   </SecondaryBtn>
                 </div>
               </div>
@@ -520,7 +531,7 @@ export default function TrustReportPage() {
 
           {exportOpts.includeReviewerNotes && report.reviewerNotes && (
             <Card className="p-5">
-              <SectionLabel>Reviewer Notes</SectionLabel>
+              <SectionLabel>{t("report.reviewerNotes")}</SectionLabel>
               <div className="bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-5 h-5 bg-[#2F7D7E] rounded-full flex items-center justify-center text-white text-[10px] font-semibold">
@@ -541,16 +552,14 @@ export default function TrustReportPage() {
 
           <div className="flex items-center justify-between p-4 bg-[#172033] rounded-2xl print:hidden">
             <div className="text-white">
-              <p className="font-semibold text-sm">Export as PDF</p>
-              <p className="text-white/60 text-xs">
-                Print-ready, audit-friendly format. Uses your browser's "Save as PDF" dialog.
-              </p>
+              <p className="font-semibold text-sm">{t("report.exportLong")}</p>
+              <p className="text-white/60 text-xs">{t("report.exportHint")}</p>
             </div>
             <button
               onClick={() => setShowExportModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-white text-[#172033] text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
             >
-              <Download className="w-4 h-4" /> Export PDF
+              <Download className="w-4 h-4" /> {t("report.exportPdf")}
             </button>
           </div>
         </div>
@@ -602,6 +611,7 @@ function EvidenceCard({
   source: string;
   timestamp: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="p-4 hover:border-[#172033]/20 transition-colors">
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -618,7 +628,7 @@ function EvidenceCard({
         </div>
       )}
       <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[10px] text-[#9CA3AF]">
-        <span className="font-mono">Source: {source}</span>
+        <span className="font-mono">{t("report.evidenceSource", { code: source })}</span>
         <span>{formatDateTime(timestamp)}</span>
       </div>
     </Card>

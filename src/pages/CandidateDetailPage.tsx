@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ClipboardCheck,
@@ -31,6 +32,7 @@ import { formatDate } from "../lib/format";
 
 export default function CandidateDetailPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { candidateId } = useParams<{ candidateId: string }>();
   const candidate = candidateId ? getCandidate(candidateId) : undefined;
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -39,13 +41,11 @@ export default function CandidateDetailPage() {
   if (!candidate) {
     return (
       <div className="flex flex-col h-full overflow-hidden">
-        <TopBar title="Candidate" subtitle="Not found" />
+        <TopBar title={t("nav.candidates")} subtitle="—" />
         <div className="flex-1 flex items-center justify-center p-6">
           <Card className="p-8 text-center max-w-sm">
-            <p className="text-sm text-[#6B7280] mb-4">
-              This candidate could not be found. They may have been removed.
-            </p>
-            <PrimaryBtn onClick={() => navigate("/app/candidates")}>Back to Candidates</PrimaryBtn>
+            <p className="text-sm text-[#6B7280] mb-4">{t("candidateDetail.notFound")}</p>
+            <PrimaryBtn onClick={() => navigate("/app/candidates")}>{t("candidateDetail.backToList")}</PrimaryBtn>
           </Card>
         </div>
       </div>
@@ -75,14 +75,14 @@ export default function CandidateDetailPage() {
               className="text-sm py-2"
               icon={<ArrowLeft className="w-4 h-4" />}
             >
-              Back
+              {t("candidateDetail.back")}
             </SecondaryBtn>
             <SecondaryBtn
               onClick={() => navigate(`/app/reviewer/${candidate.id}`)}
               className="text-sm py-2"
               icon={<ClipboardCheck className="w-4 h-4" />}
             >
-              Open Reviewer
+              {t("candidateDetail.openReviewer")}
             </SecondaryBtn>
             {candidate.reportReady && (
               <PrimaryBtn
@@ -90,7 +90,7 @@ export default function CandidateDetailPage() {
                 className="text-sm py-2"
                 icon={<Eye className="w-4 h-4" />}
               >
-                View Trust Report
+                {t("candidateDetail.viewTrustReport")}
               </PrimaryBtn>
             )}
           </div>
@@ -102,7 +102,7 @@ export default function CandidateDetailPage() {
           <div className="lg:col-span-2 space-y-5">
             {/* Overview */}
             <Card className="p-5">
-              <SectionLabel>Candidate Overview</SectionLabel>
+              <SectionLabel>{t("candidateDetail.overview")}</SectionLabel>
               <div className="flex items-start justify-between mb-4 -mt-1">
                 <div>
                   <h3 className="font-bold text-base text-[#111827]">{candidate.name}</h3>
@@ -118,10 +118,10 @@ export default function CandidateDetailPage() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-[#E5E7EB] pt-4">
                 {[
-                  { label: "Email", value: candidate.email, icon: Mail },
-                  { label: "Created", value: formatDate(candidate.createdAt), icon: Calendar },
-                  { label: "Last updated", value: candidate.lastUpdated, icon: Calendar },
-                  { label: "Reviewer", value: candidate.reviewer ?? "Unassigned", icon: User },
+                  { label: t("candidateDetail.fieldEmail"), value: candidate.email, icon: Mail },
+                  { label: t("candidateDetail.fieldCreated"), value: formatDate(candidate.createdAt), icon: Calendar },
+                  { label: t("candidateDetail.fieldLastUpdated"), value: candidate.lastUpdated, icon: Calendar },
+                  { label: t("candidateDetail.fieldReviewer"), value: candidate.reviewer ?? t("candidateDetail.unassigned"), icon: User },
                 ].map((f) => (
                   <div key={f.label}>
                     <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF] mb-0.5 flex items-center gap-1">
@@ -136,15 +136,15 @@ export default function CandidateDetailPage() {
 
             {/* Identity */}
             <Card className="p-5">
-              <SectionLabel>Identity</SectionLabel>
+              <SectionLabel>{t("candidateDetail.identity")}</SectionLabel>
               {submission.basicInfo ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 -mt-1">
                   {[
-                    { label: "Full name", value: submission.basicInfo.fullName },
-                    { label: "Email", value: submission.basicInfo.email },
-                    { label: "Country", value: submission.basicInfo.country },
+                    { label: t("candidateDetail.labelFullName"), value: submission.basicInfo.fullName },
+                    { label: t("candidateDetail.labelEmail"), value: submission.basicInfo.email },
+                    { label: t("candidateDetail.labelCountry"), value: submission.basicInfo.country },
                     {
-                      label: "LinkedIn",
+                      label: t("candidateDetail.labelLinkedin"),
                       value: submission.basicInfo.linkedin || "—",
                     },
                   ].map((f) => (
@@ -160,13 +160,13 @@ export default function CandidateDetailPage() {
                   ))}
                 </div>
               ) : (
-                <EmptyHint message="Candidate has not submitted basic information yet." />
+                <EmptyHint message={t("candidateDetail.identityEmpty")} />
               )}
             </Card>
 
             {/* Portfolio */}
             <Card className="p-5">
-              <SectionLabel>Portfolio</SectionLabel>
+              <SectionLabel>{t("candidateDetail.portfolio")}</SectionLabel>
               {submission.portfolio.length > 0 ? (
                 <div className="space-y-2 -mt-1">
                   {submission.portfolio.map((p) => (
@@ -192,16 +192,17 @@ export default function CandidateDetailPage() {
                   ))}
                 </div>
               ) : (
-                <EmptyHint message="No portfolio links submitted yet." />
+                <EmptyHint message={t("candidateDetail.portfolioEmpty")} />
               )}
             </Card>
 
             {/* Media */}
             <Card className="p-5">
-              <SectionLabel>Media Samples</SectionLabel>
+              <SectionLabel>{t("candidateDetail.mediaSamples")}</SectionLabel>
               <div className="grid sm:grid-cols-3 gap-3 -mt-1">
                 <MediaCell
-                  label="Masked Document"
+                  label={t("candidateDetail.maskedDocument")}
+                  empty={t("candidateDetail.mediaEmpty")}
                   icon={<FileIcon className="w-4 h-4 text-[#6B7280]" />}
                 >
                   {submission.document ? (
@@ -216,27 +217,21 @@ export default function CandidateDetailPage() {
                         {submission.document.fileName} · {submission.document.mimeType}
                       </p>
                     )
-                  ) : (
-                    <EmptyDot />
-                  )}
+                  ) : null}
                 </MediaCell>
-                <MediaCell label="Selfie Video" icon={<Video className="w-4 h-4 text-[#6B7280]" />}>
+                <MediaCell label={t("candidateDetail.selfieVideo")} empty={t("candidateDetail.mediaEmpty")} icon={<Video className="w-4 h-4 text-[#6B7280]" />}>
                   {submission.selfie ? (
                     <video
                       src={submission.selfie.dataUrl}
                       controls
                       className="w-full h-32 object-cover rounded-lg bg-black"
                     />
-                  ) : (
-                    <EmptyDot />
-                  )}
+                  ) : null}
                 </MediaCell>
-                <MediaCell label="Voice Sample" icon={<Mic className="w-4 h-4 text-[#6B7280]" />}>
+                <MediaCell label={t("candidateDetail.voiceSample")} empty={t("candidateDetail.mediaEmpty")} icon={<Mic className="w-4 h-4 text-[#6B7280]" />}>
                   {submission.voice ? (
                     <audio src={submission.voice.dataUrl} controls className="w-full mt-2" />
-                  ) : (
-                    <EmptyDot />
-                  )}
+                  ) : null}
                 </MediaCell>
               </div>
             </Card>
@@ -246,14 +241,14 @@ export default function CandidateDetailPage() {
           <div className="space-y-5">
             {/* Quick actions */}
             <Card className="p-5">
-              <SectionLabel>Quick Actions</SectionLabel>
+              <SectionLabel>{t("candidateDetail.quickActions")}</SectionLabel>
               <div className="space-y-2 -mt-1">
                 <PrimaryBtn
                   onClick={() => navigate(`/app/reviewer/${candidate.id}`)}
                   className="w-full justify-center text-sm"
                   icon={<ClipboardCheck className="w-4 h-4" />}
                 >
-                  Open Reviewer Review
+                  {t("candidateDetail.openReviewerReview")}
                 </PrimaryBtn>
                 <SecondaryBtn
                   onClick={() => navigate(`/app/reports/${candidate.id}`)}
@@ -261,84 +256,96 @@ export default function CandidateDetailPage() {
                   icon={<FileText className="w-4 h-4" />}
                   disabled={!candidate.reportReady}
                 >
-                  View Trust Report
+                  {t("candidateDetail.viewTrustReport")}
                 </SecondaryBtn>
                 <SecondaryBtn
                   onClick={() => setShowLinkModal(true)}
                   className="w-full justify-center text-sm"
                   icon={<LinkIcon className="w-4 h-4" />}
                 >
-                  Send / Copy Verification Link
+                  {t("candidateDetail.sendCopyLink")}
                 </SecondaryBtn>
                 <SecondaryBtn
                   onClick={() => setShowRequestModal(true)}
                   className="w-full justify-center text-sm"
                   icon={<MessageSquare className="w-4 h-4" />}
                 >
-                  Request More Information
+                  {t("candidateDetail.requestMoreInfo")}
                 </SecondaryBtn>
               </div>
             </Card>
 
             {/* Verification status */}
             <Card className="p-5">
-              <SectionLabel>Verification Status</SectionLabel>
+              <SectionLabel>{t("candidateDetail.verificationStatus")}</SectionLabel>
               <div className="-mt-1 space-y-2 text-xs">
                 <StatusRow
-                  label="Consent"
+                  label={t("candidateDetail.section.consent")}
                   done={submission.consent.agreed}
                   detail={
                     submission.consent.agreedAt
-                      ? `Given ${formatDate(submission.consent.agreedAt)}`
+                      ? t("candidateDetail.section.consentGiven", { date: formatDate(submission.consent.agreedAt) })
                       : undefined
                   }
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
-                <StatusRow label="Basic info" done={!!submission.basicInfo} />
+                <StatusRow label={t("candidateDetail.section.basicInfo")} done={!!submission.basicInfo} readyLabel={t("common.ready")} pendingLabel={t("common.pending")} />
                 <StatusRow
-                  label="Portfolio links"
+                  label={t("candidateDetail.section.portfolio")}
                   done={submission.portfolio.length > 0}
                   detail={
                     submission.portfolio.length
-                      ? `${submission.portfolio.length} link(s)`
+                      ? t("candidateDetail.section.linksCount", { count: submission.portfolio.length })
                       : undefined
                   }
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
                 <StatusRow
-                  label="Masked document"
+                  label={t("candidateDetail.section.document")}
                   done={!!submission.document}
                   detail={submission.document?.fileName}
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
                 <StatusRow
-                  label="Selfie video"
+                  label={t("candidateDetail.section.selfie")}
                   done={!!submission.selfie}
                   detail={
                     submission.selfie
-                      ? `${Math.round(submission.selfie.durationSec ?? 0)}s recorded`
+                      ? t("candidateDetail.section.secondsRecorded", { seconds: Math.round(submission.selfie.durationSec ?? 0) })
                       : undefined
                   }
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
                 <StatusRow
-                  label="Voice sample"
+                  label={t("candidateDetail.section.voice")}
                   done={!!submission.voice}
                   detail={
                     submission.voice
-                      ? `${Math.round(submission.voice.durationSec ?? 0)}s recorded`
+                      ? t("candidateDetail.section.secondsRecorded", { seconds: Math.round(submission.voice.durationSec ?? 0) })
                       : undefined
                   }
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
                 <StatusRow
-                  label="Trust report"
+                  label={t("candidateDetail.section.report")}
                   done={!!report}
-                  detail={report ? `Generated ${formatDate(report.generatedAt)}` : undefined}
+                  detail={report ? t("candidateDetail.section.reportGenerated", { date: formatDate(report.generatedAt) }) : undefined}
+                  readyLabel={t("common.ready")}
+                  pendingLabel={t("common.pending")}
                 />
               </div>
             </Card>
 
             {/* Recent activity */}
             <Card className="p-5">
-              <SectionLabel>Recent Activity</SectionLabel>
+              <SectionLabel>{t("candidateDetail.recentActivity")}</SectionLabel>
               {recentActivity.length === 0 ? (
-                <EmptyHint message="No activity recorded yet." />
+                <EmptyHint message={t("candidateDetail.recentActivityEmpty")} />
               ) : (
                 <div className="-mt-1 space-y-2">
                   {recentActivity.map((a) => (
@@ -361,9 +368,9 @@ export default function CandidateDetailPage() {
 
             {review.recommendedAction && review.recommendedAction !== "no-action" && (
               <Card className="p-5 border-[#C6923A]/30 bg-[#C6923A]/5">
-                <SectionLabel>Reviewer Recommendation</SectionLabel>
-                <p className="-mt-1 text-xs text-[#8A6422] font-medium capitalize">
-                  {review.recommendedAction.replace(/-/g, " ")}
+                <SectionLabel>{t("candidateDetail.reviewerRecommendation")}</SectionLabel>
+                <p className="-mt-1 text-xs text-[#8A6422] font-medium">
+                  {t(`actionTitles.${actionKeyToCamel(review.recommendedAction)}`)}
                 </p>
                 {review.notes && (
                   <p className="mt-2 text-xs text-[#6B7280] leading-relaxed line-clamp-4">
@@ -394,10 +401,12 @@ export default function CandidateDetailPage() {
 function MediaCell({
   label,
   icon,
+  empty,
   children,
 }: {
   label: string;
   icon: React.ReactNode;
+  empty: string;
   children: React.ReactNode;
 }) {
   return (
@@ -406,16 +415,14 @@ function MediaCell({
         {icon}
         {label}
       </p>
-      {children}
+      {children ?? <EmptyDot message={empty} />}
     </div>
   );
 }
 
-function EmptyDot() {
+function EmptyDot({ message }: { message: string }) {
   return (
-    <div className="flex items-center justify-center h-24 text-[11px] text-[#9CA3AF]">
-      Not yet provided
-    </div>
+    <div className="flex items-center justify-center h-24 text-[11px] text-[#9CA3AF]">{message}</div>
   );
 }
 
@@ -427,10 +434,14 @@ function StatusRow({
   label,
   done,
   detail,
+  readyLabel,
+  pendingLabel,
 }: {
   label: string;
   done: boolean;
   detail?: string;
+  readyLabel: string;
+  pendingLabel: string;
 }) {
   return (
     <div className="flex items-center justify-between border border-[#E5E7EB] rounded-lg px-3 py-2">
@@ -443,8 +454,17 @@ function StatusRow({
           done ? "text-[#2F7D7E]" : "text-[#9CA3AF]"
         }`}
       >
-        {done ? "Ready" : "Pending"}
+        {done ? readyLabel : pendingLabel}
       </span>
     </div>
   );
+}
+
+function actionKeyToCamel(k: string): string {
+  if (k === "no-action") return "noAction";
+  if (k === "verification-call") return "verificationCall";
+  if (k === "portfolio-walkthrough") return "portfolioWalkthrough";
+  if (k === "additional-doc") return "additionalDoc";
+  if (k === "manual-review") return "manualReview";
+  return k;
 }

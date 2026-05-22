@@ -1,5 +1,6 @@
 import React from "react";
 import { Bell, FileText, ClipboardCheck, Users, Mail, Share2, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Popover } from "../primitives/Popover";
 import { LanguageToggle } from "../primitives/LanguageToggle";
 import { listAudit } from "../../api/audit";
@@ -32,6 +33,7 @@ export function TopBar({
   subtitle?: string;
   actions?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const recent = listAudit().slice(0, 5);
 
   return (
@@ -59,13 +61,15 @@ export function TopBar({
           <div className="min-w-72">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
-                Recent activity
+                {t("notifications.recentActivity")}
               </p>
-              <span className="text-[10px] text-[#9CA3AF]">{recent.length} item(s)</span>
+              <span className="text-[10px] text-[#9CA3AF]">
+                {t("notifications.itemsCount", { count: recent.length })}
+              </span>
             </div>
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {recent.length === 0 && (
-                <p className="text-xs text-[#9CA3AF] py-4 text-center">No activity yet.</p>
+                <p className="text-xs text-[#9CA3AF] py-4 text-center">{t("notifications.empty")}</p>
               )}
               {recent.map((entry) => {
                 const Icon = TYPE_ICON[entry.type] ?? Bell;

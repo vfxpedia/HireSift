@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "../primitives/Modal";
 import { PrimaryBtn, SecondaryBtn } from "../primitives/Buttons";
 import { inputClass } from "../primitives/Field";
@@ -11,6 +12,7 @@ interface EditTemplateModalProps {
 }
 
 export function EditTemplateModal({ open, onClose, initialValue, onSave }: EditTemplateModalProps) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(initialValue);
 
   const save = () => {
@@ -22,13 +24,13 @@ export function EditTemplateModal({ open, onClose, initialValue, onSave }: EditT
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit Consent Template"
-      description="This template is shown to every candidate before they begin verification. Keep it clear, non-accusatory, and aligned with privacy guardrails."
+      title={t("settings.editModal.title")}
+      description={t("settings.editModal.description")}
       size="lg"
       footer={
         <>
-          <SecondaryBtn onClick={onClose}>Cancel</SecondaryBtn>
-          <PrimaryBtn onClick={save}>Save changes</PrimaryBtn>
+          <SecondaryBtn onClick={onClose}>{t("common.cancel")}</SecondaryBtn>
+          <PrimaryBtn onClick={save}>{t("settings.saveChanges")}</PrimaryBtn>
         </>
       }
     >
@@ -38,9 +40,7 @@ export function EditTemplateModal({ open, onClose, initialValue, onSave }: EditT
         rows={16}
         className={inputClass + " font-mono text-xs leading-relaxed"}
       />
-      <p className="text-[11px] text-[#9CA3AF] mt-2">
-        Avoid words like "fraud", "fake", "reject", or any automatic-decision language.
-      </p>
+      <p className="text-[11px] text-[#9CA3AF] mt-2">{t("settings.editModal.footnote")}</p>
     </Modal>
   );
 }

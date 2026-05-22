@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Users,
@@ -35,6 +36,7 @@ import { WEEKLY_DATA } from "../lib/seed";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
   const [tick, setTick] = useState(0);
   const refresh = () => setTick((t) => t + 1);
@@ -47,28 +49,28 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: "Total Candidates",
+      label: t("dashboard.totalCandidates"),
       value: stats.total,
       icon: <Users className="w-4 h-4" />,
       color: "text-[#172033]",
       bg: "bg-[#172033]/8",
     },
     {
-      label: "Pending Submission",
+      label: t("dashboard.pendingSubmission"),
       value: stats.pending,
       icon: <Clock className="w-4 h-4" />,
       color: "text-[#C6923A]",
       bg: "bg-[#C6923A]/8",
     },
     {
-      label: "Reports Ready",
+      label: t("dashboard.reportsReady"),
       value: stats.reportsReady,
       icon: <FileText className="w-4 h-4" />,
       color: "text-[#2F7D7E]",
       bg: "bg-[#2F7D7E]/8",
     },
     {
-      label: "High Attention",
+      label: t("dashboard.highAttention"),
       value: stats.highAttention,
       icon: <AlertTriangle className="w-4 h-4" />,
       color: "text-[#8A6422]",
@@ -76,18 +78,30 @@ export default function DashboardPage() {
     },
   ];
 
+  const distLocalized = dist.map((d) => ({
+    ...d,
+    name:
+      d.name === "Low Attention"
+        ? t("attention.low")
+        : d.name === "Review Recommended"
+        ? t("attention.medium")
+        : d.name === "Manual Review"
+        ? t("attention.manual")
+        : d.name,
+  }));
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Dashboard"
-        subtitle="Overview of your hiring pipeline"
+        title={t("dashboard.title")}
+        subtitle={t("dashboard.subtitle")}
         actions={
           <PrimaryBtn
             onClick={() => setShowModal(true)}
             icon={<Plus className="w-4 h-4" />}
             className="text-sm py-2"
           >
-            New Verification
+            {t("dashboard.newVerification")}
           </PrimaryBtn>
         }
       />
@@ -109,8 +123,8 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-5 mb-6">
           <Card className="col-span-2 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-sm text-[#111827]">Weekly Activity</h3>
-              <span className="text-xs text-[#6B7280]">This week</span>
+              <h3 className="font-semibold text-sm text-[#111827]">{t("dashboard.weeklyActivity")}</h3>
+              <span className="text-xs text-[#6B7280]">{t("dashboard.thisWeek")}</span>
             </div>
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={WEEKLY_DATA} barSize={16}>
@@ -118,25 +132,25 @@ export default function DashboardPage() {
                 <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="submissions" fill="#2F7D7E" radius={[4, 4, 0, 0]} name="Submissions" />
-                <Bar dataKey="reviews" fill="#C6923A" radius={[4, 4, 0, 0]} name="Reviews" />
+                <Bar dataKey="submissions" fill="#2F7D7E" radius={[4, 4, 0, 0]} name={t("dashboard.submissions")} />
+                <Bar dataKey="reviews" fill="#C6923A" radius={[4, 4, 0, 0]} name={t("dashboard.reviews")} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
 
           <Card className="p-5">
-            <h3 className="font-semibold text-sm text-[#111827] mb-4">Attention Distribution</h3>
+            <h3 className="font-semibold text-sm text-[#111827] mb-4">{t("dashboard.attentionDistribution")}</h3>
             <div className="flex justify-center mb-4">
               <PieChart width={140} height={140}>
-                <Pie data={dist} cx={65} cy={65} innerRadius={45} outerRadius={65} paddingAngle={3} dataKey="value">
-                  {dist.map((entry, index) => (
+                <Pie data={distLocalized} cx={65} cy={65} innerRadius={45} outerRadius={65} paddingAngle={3} dataKey="value">
+                  {distLocalized.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
               </PieChart>
             </div>
             <div className="space-y-2">
-              {dist.map((d) => (
+              {distLocalized.map((d) => (
                 <div key={d.name} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
@@ -151,16 +165,23 @@ export default function DashboardPage() {
 
         <Card>
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB]">
-            <h3 className="font-semibold text-sm text-[#111827]">Recent Candidates</h3>
+            <h3 className="font-semibold text-sm text-[#111827]">{t("dashboard.recentCandidates")}</h3>
             <button onClick={() => navigate("/app/candidates")} className="text-xs text-[#2F7D7E] hover:underline">
-              View all
+              {t("dashboard.viewAll")}
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                  {["Candidate", "Role", "Status", "Attention", "Report", "Updated"].map((h) => (
+                  {[
+                    t("dashboard.colCandidate"),
+                    t("dashboard.colRole"),
+                    t("dashboard.colStatus"),
+                    t("dashboard.colAttention"),
+                    t("dashboard.colReport"),
+                    t("dashboard.colUpdated"),
+                  ].map((h) => (
                     <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-[#6B7280]">{h}</th>
                   ))}
                 </tr>
@@ -194,10 +215,10 @@ export default function DashboardPage() {
                           }}
                           className="text-xs text-[#2F7D7E] hover:underline flex items-center gap-1"
                         >
-                          <Eye className="w-3 h-3" /> View
+                          <Eye className="w-3 h-3" /> {t("dashboard.view")}
                         </button>
                       ) : (
-                        <span className="text-xs text-[#9CA3AF]">Not ready</span>
+                        <span className="text-xs text-[#9CA3AF]">{t("dashboard.notReady")}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-[#6B7280]">{c.lastUpdated}</td>

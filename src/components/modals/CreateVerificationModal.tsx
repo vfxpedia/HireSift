@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Info, Mail, Copy, Check } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Modal } from "../primitives/Modal";
 import { PrimaryBtn, SecondaryBtn } from "../primitives/Buttons";
 import { Field, TextInput, inputClass } from "../primitives/Field";
@@ -20,11 +21,18 @@ type FormValues = {
   inviteNote: string;
 };
 
-const VERIFICATION_TYPES: { value: VerificationType; label: string }[] = [
-  { value: "full", label: "Full verification (identity + portfolio + media)" },
-  { value: "identity-only", label: "Identity-only" },
-  { value: "portfolio-only", label: "Portfolio-only" },
-];
+const VERIFICATION_TYPE_VALUES: VerificationType[] = ["full", "identity-only", "portfolio-only"];
+
+function verificationTypeKey(v: VerificationType): string {
+  switch (v) {
+    case "full":
+      return "full";
+    case "identity-only":
+      return "identityOnly";
+    case "portfolio-only":
+      return "portfolioOnly";
+  }
+}
 
 export function CreateVerificationModal({
   onClose,
@@ -33,6 +41,7 @@ export function CreateVerificationModal({
   onClose: () => void;
   onCreated: (candidate: Candidate) => void;
 }) {
+  const { t } = useTranslation();
   const [created, setCreated] = useState<Candidate | null>(null);
   const [copied, setCopied] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
@@ -63,7 +72,7 @@ export function CreateVerificationModal({
   const onSubmit = (values: FormValues) => {
     const c = createCandidate(values);
     setCreated(c);
-    toast.success(`Verification request ${c.code} created`);
+    toast.success(t("modals.createVerification.createdToast", { code: c.code }));
   };
 
   const copyLink = async () => {
@@ -71,7 +80,7 @@ export function CreateVerificationModal({
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-      toast.success("Link copied");
+      toast.success(t("modals.createVerification.linkCopiedToast"));
     } catch {
       /* noop */
     }
@@ -87,60 +96,60 @@ export function CreateVerificationModal({
       type: "request",
     });
     setInviteSent(true);
-    toast.success(`Invite sent to ${created.email}`);
+    toast.success(t("modals.createVerification.inviteSentToast", { email: created.email }));
   };
 
   return (
     <Modal
       open={true}
       onClose={onClose}
-      title={created ? "Verification Link Ready" : "New Verification Request"}
+      title={created ? t("modals.createVerification.successTitle") : t("modals.createVerification.title")}
       size="md"
     >
       {!created ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Candidate name" error={errors.name?.message}>
+          <Field label={t("modals.createVerification.candidateName")} error={errors.name?.message}>
             <TextInput
-              placeholder="e.g. Alex Kim"
+              placeholder={t("modals.createVerification.candidateNamePlaceholder")}
               error={!!errors.name}
-              {...register("name", { required: "Required" })}
+              {...register("name", { required: t("modals.createVerification.errorRequired") })}
             />
           </Field>
-          <Field label="Candidate email" error={errors.email?.message}>
+          <Field label={t("modals.createVerification.candidateEmail")} error={errors.email?.message}>
             <TextInput
               type="email"
-              placeholder="candidate@email.com"
+              placeholder={t("modals.createVerification.candidateEmailPlaceholder")}
               error={!!errors.email}
               {...register("email", {
-                required: "Required",
-                pattern: { value: /\S+@\S+\.\S+/, message: "Enter a valid email" },
+                required: t("modals.createVerification.errorRequired"),
+                pattern: { value: /\S+@\S+\.\S+/, message: t("modals.createVerification.errorInvalidEmail") },
               })}
             />
           </Field>
-          <Field label="Role" error={errors.role?.message}>
+          <Field label={t("modals.createVerification.role")} error={errors.role?.message}>
             <TextInput
-              placeholder="e.g. Senior Frontend Developer"
+              placeholder={t("modals.createVerification.rolePlaceholder")}
               error={!!errors.role}
-              {...register("role", { required: "Required" })}
+              {...register("role", { required: t("modals.createVerification.errorRequired") })}
             />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Verification type">
+            <Field label={t("modals.createVerification.verificationType")}>
               <select className={inputClass} {...register("verificationType")}>
-                {VERIFICATION_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
+                {VERIFICATION_TYPE_VALUES.map((v) => (
+                  <option key={v} value={v}>
+                    {t(`modals.createVerification.verificationTypeOption.${verificationTypeKey(v)}`)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Due date">
+            <Field label={t("modals.createVerification.dueDate")}>
               <TextInput type="date" {...register("dueDate")} />
             </Field>
           </div>
 
-          <Field label="Assigned reviewer">
+          <Field label={t("modals.createVerification.assignedReviewer")}>
             <select className={inputClass} {...register("reviewer")}>
               {REVIEWERS.map((r) => (
                 <option key={r} value={r}>
@@ -150,10 +159,10 @@ export function CreateVerificationModal({
             </select>
           </Field>
 
-          <Field label="Optional note to candidate" optional>
+          <Field label={t("modals.createVerification.optionalNote")} optional>
             <textarea
               rows={3}
-              placeholder="Add context, scheduling details, or special instructions…"
+              placeholder={t("modals.createVerification.optionalNotePlaceholder")}
               className={inputClass + " resize-none"}
               {...register("inviteNote")}
             />
@@ -161,15 +170,14 @@ export function CreateVerificationModal({
 
           <div className="bg-[#F7F8FA] rounded-xl p-3">
             <p className="text-xs text-[#6B7280] leading-relaxed">
-              <Info className="w-3 h-3 inline mr-1 text-[#9CA3AF]" />A secure verification link will be
-              generated. The candidate will see the full consent and privacy notice before submitting
-              any information.
+              <Info className="w-3 h-3 inline mr-1 text-[#9CA3AF]" />
+              {t("modals.createVerification.infoNote")}
             </p>
           </div>
 
           <div className="flex gap-3 pt-1">
             <SecondaryBtn onClick={onClose} className="flex-1 justify-center">
-              Cancel
+              {t("common.cancel")}
             </SecondaryBtn>
             <PrimaryBtn
               type="submit"
@@ -177,7 +185,7 @@ export function CreateVerificationModal({
               className="flex-1 justify-center"
               icon={<Mail className="w-4 h-4" />}
             >
-              Create & Generate Link
+              {t("modals.createVerification.submit")}
             </PrimaryBtn>
           </div>
         </form>
@@ -185,32 +193,31 @@ export function CreateVerificationModal({
         <div className="space-y-4">
           <div className="p-3 bg-[#2F7D7E]/10 border border-[#2F7D7E]/20 rounded-xl text-xs text-[#2F7D7E]">
             <Check className="w-3.5 h-3.5 inline mr-1.5" />
-            Created request <span className="font-mono font-semibold">{created.code}</span> for{" "}
-            <span className="font-medium">{created.name}</span>.
+            {t("modals.createVerification.createdHeading", { code: created.code, name: created.name })}
           </div>
           <div className="space-y-1.5 text-[11px] text-[#6B7280]">
             <p className="flex items-center gap-2">
-              <Check className="w-3 h-3 text-[#2F7D7E]" /> Verification link generated
+              <Check className="w-3 h-3 text-[#2F7D7E]" /> {t("modals.createVerification.linkGenerated")}
             </p>
             {copied && (
               <p className="flex items-center gap-2">
-                <Check className="w-3 h-3 text-[#2F7D7E]" /> Link copied to clipboard
+                <Check className="w-3 h-3 text-[#2F7D7E]" /> {t("modals.createVerification.linkCopiedStep")}
               </p>
             )}
             {inviteSent && (
               <>
                 <p className="flex items-center gap-2">
-                  <Check className="w-3 h-3 text-[#2F7D7E]" /> Email invite sent
+                  <Check className="w-3 h-3 text-[#2F7D7E]" /> {t("modals.createVerification.inviteSentStep")}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Check className="w-3 h-3 text-[#2F7D7E]" /> Candidate status: <span className="font-semibold">Link Sent</span>
+                  <Check className="w-3 h-3 text-[#2F7D7E]" /> {t("modals.createVerification.statusLinkSent")}
                 </p>
               </>
             )}
           </div>
           <div>
             <label className="block text-xs font-medium text-[#374151] mb-1.5">
-              Verification link
+              {t("modals.createVerification.verificationLinkLabel")}
             </label>
             <div className="flex gap-2">
               <input
@@ -225,7 +232,7 @@ export function CreateVerificationModal({
                 className="px-3 py-2.5 text-xs font-medium bg-[#172033] text-white rounded-lg hover:bg-[#1e2d47] flex items-center gap-1.5 whitespace-nowrap"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? t("common.copied") : t("common.copy")}
               </button>
             </div>
           </div>
@@ -236,16 +243,16 @@ export function CreateVerificationModal({
               className="w-full justify-center"
               icon={<Mail className="w-4 h-4" />}
             >
-              Send Invite Email
+              {t("modals.createVerification.sendInvite")}
             </PrimaryBtn>
           ) : null}
 
           <div className="flex gap-3 pt-1">
             <SecondaryBtn onClick={onClose} className="flex-1 justify-center">
-              Close
+              {t("common.close")}
             </SecondaryBtn>
             <PrimaryBtn onClick={() => onCreated(created)} className="flex-1 justify-center">
-              Open Candidate
+              {t("modals.createVerification.openCandidate")}
             </PrimaryBtn>
           </div>
         </div>

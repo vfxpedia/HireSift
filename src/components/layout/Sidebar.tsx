@@ -47,7 +47,7 @@ export function Sidebar() {
     setCurrentOrgId(id);
     setCurrentId(id);
     const next = ORGANIZATIONS.find((o) => o.id === id);
-    if (next) toast.success(`Switched to ${next.name}`);
+    if (next) toast.success(t("orgSwitcher.switchedToast", { name: next.name }));
   };
 
   return (
@@ -95,7 +95,9 @@ export function Sidebar() {
                 >
                   <div className="flex-1">
                     <p className="text-xs font-medium text-[#111827]">{o.name}</p>
-                    <p className="text-[10px] text-[#9CA3AF] capitalize">{o.type} · {o.seats} seats</p>
+                    <p className="text-[10px] text-[#9CA3AF]">
+                      {t("orgSwitcher.seats", { type: o.type, count: o.seats })}
+                    </p>
                   </div>
                   {o.id === current.id && <Check className="w-3.5 h-3.5 text-[#2F7D7E]" />}
                 </button>

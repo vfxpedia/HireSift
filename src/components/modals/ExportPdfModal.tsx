@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Download, FileText, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "../primitives/Modal";
 import { PrimaryBtn, SecondaryBtn } from "../primitives/Buttons";
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function ExportPdfModal({ open, onClose, candidateName, candidateCode, onExport }: Props) {
+  const { t } = useTranslation();
   const [opts, setOpts] = useState<ExportOptions>({
     includeEvidenceCards: true,
     includeReviewerNotes: true,
@@ -41,15 +43,15 @@ export function ExportPdfModal({ open, onClose, candidateName, candidateCode, on
     <Modal
       open={open}
       onClose={close}
-      title="Export PDF"
+      title={t("modals.exportPdf.title")}
       description={`${candidateName} · ${candidateCode}`}
       size="md"
       footer={
         <>
-          <SecondaryBtn onClick={close}>{ready ? "Close" : "Cancel"}</SecondaryBtn>
+          <SecondaryBtn onClick={close}>{ready ? t("common.close") : t("common.cancel")}</SecondaryBtn>
           {!ready && (
             <PrimaryBtn onClick={handleExport} icon={<Download className="w-4 h-4" />}>
-              Download PDF
+              {t("modals.exportPdf.download")}
             </PrimaryBtn>
           )}
         </>
@@ -59,24 +61,21 @@ export function ExportPdfModal({ open, onClose, candidateName, candidateCode, on
         <div className="border border-[#E5E7EB] rounded-xl p-4 bg-[#F9FAFB]">
           <div className="flex items-center gap-2 mb-2">
             <FileText className="w-4 h-4 text-[#172033]" />
-            <p className="text-sm font-semibold text-[#111827]">Document Preview</p>
+            <p className="text-sm font-semibold text-[#111827]">{t("modals.exportPdf.previewTitle")}</p>
           </div>
-          <p className="text-xs text-[#6B7280] leading-relaxed">
-            HireSift uses your browser's "Save as PDF" feature. A4 paper, side bars and chrome
-            hidden, and the sections you select below included.
-          </p>
+          <p className="text-xs text-[#6B7280] leading-relaxed">{t("modals.exportPdf.previewBody")}</p>
         </div>
 
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-            Sections to include
+            {t("modals.exportPdf.sections")}
           </p>
           <div className="space-y-2">
             {(
               [
-                { key: "includeEvidenceCards", label: "Evidence card grid" },
-                { key: "includeReviewerNotes", label: "Reviewer notes" },
-                { key: "includeGuardrailNotice", label: "Guardrail notice" },
+                { key: "includeEvidenceCards", label: t("modals.exportPdf.optEvidence") },
+                { key: "includeReviewerNotes", label: t("modals.exportPdf.optReviewerNotes") },
+                { key: "includeGuardrailNotice", label: t("modals.exportPdf.optGuardrail") },
               ] as const
             ).map((opt) => (
               <label
@@ -99,8 +98,8 @@ export function ExportPdfModal({ open, onClose, candidateName, candidateCode, on
           <div className="flex items-start gap-2 px-3 py-2.5 bg-[#2F7D7E]/10 border border-[#2F7D7E]/30 rounded-lg">
             <Check className="w-3.5 h-3.5 text-[#2F7D7E] mt-0.5" />
             <div className="text-xs text-[#2F7D7E] leading-relaxed">
-              <p className="font-semibold">PDF ready</p>
-              <p>Your browser's print dialog opened. Choose "Save as PDF" as the destination.</p>
+              <p className="font-semibold">{t("modals.exportPdf.readyTitle")}</p>
+              <p>{t("modals.exportPdf.readyBody")}</p>
             </div>
           </div>
         )}

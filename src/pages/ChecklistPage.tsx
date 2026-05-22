@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, Circle, AlertTriangle, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/layout/TopBar";
 import { Card, SectionLabel } from "../components/primitives/Card";
 import { PrimaryBtn } from "../components/primitives/Buttons";
@@ -40,26 +41,26 @@ const ITEMS: ChecklistItem[] = [
   { id: "scope", requirement: "MVP / Future / Out-of-Scope", defaultStatus: "complete" },
 ];
 
-const STATUS_CONFIG: Record<Status, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
+const STATUS_CONFIG: Record<Status, { cls: string; icon: React.ComponentType<{ className?: string }>; iconCls: string }> = {
   complete: {
-    label: "Complete",
     cls: "bg-[#2F7D7E]/10 text-[#2F7D7E] border-[#2F7D7E]/30",
     icon: CheckCircle,
+    iconCls: "text-[#2F7D7E]",
   },
   partial: {
-    label: "Partial",
     cls: "bg-[#C6923A]/10 text-[#8A6422] border-[#C6923A]/30",
     icon: Clock,
+    iconCls: "text-[#8A6422]",
   },
   missing: {
-    label: "Missing",
     cls: "bg-gray-100 text-gray-500 border-gray-200",
     icon: Circle,
+    iconCls: "text-gray-500",
   },
   manual: {
-    label: "Needs Manual Review",
     cls: "bg-[#172033]/10 text-[#172033] border-[#172033]/30",
     icon: AlertTriangle,
+    iconCls: "text-[#172033]",
   },
 };
 
@@ -77,6 +78,7 @@ function buildDefault(): ChecklistState {
 }
 
 export default function ChecklistPage() {
+  const { t } = useTranslation();
   const [state, setState] = useState<ChecklistState>(() => ({
     ...buildDefault(),
     ...load<ChecklistState>(STORAGE_KEY, {}),
@@ -101,7 +103,7 @@ export default function ChecklistPage() {
   const reset = () => {
     setState(buildDefault());
     save(STORAGE_KEY, {});
-    toast.success("Checklist reset to defaults");
+    toast.success(t("checklist.resetToast"));
   };
 
   const totals = ITEMS.reduce<Record<Status, number>>(
@@ -116,11 +118,11 @@ export default function ChecklistPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Prototype Completion Checklist"
-        subtitle="Track which MVP requirements are ready for demo"
+        title={t("checklist.title")}
+        subtitle={t("checklist.subtitle")}
         actions={
           <PrimaryBtn onClick={reset} className="text-sm py-2">
-            Reset to defaults
+            {t("checklist.reset")}
           </PrimaryBtn>
         }
       />
@@ -134,8 +136,8 @@ export default function ChecklistPage() {
               return (
                 <Card key={s} className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className={cn("w-4 h-4", cfg.cls.split(" ")[1])} />
-                    <p className="text-xs text-[#6B7280]">{cfg.label}</p>
+                    <Icon className={cn("w-4 h-4", cfg.iconCls)} />
+                    <p className="text-xs text-[#6B7280]">{t(`checklist.status.${s}`)}</p>
                   </div>
                   <p className="text-2xl font-bold text-[#111827]">{totals[s] ?? 0}</p>
                 </Card>
@@ -145,17 +147,17 @@ export default function ChecklistPage() {
 
           <Card>
             <div className="px-5 py-4 border-b border-[#E5E7EB]">
-              <SectionLabel>Requirements</SectionLabel>
+              <SectionLabel>{t("checklist.requirementsTitle")}</SectionLabel>
               <p className="text-sm font-semibold text-[#111827] -mt-1">
-                MVP completion status — editable
+                {t("checklist.requirementsHeading")}
               </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                    {["Requirement", "Status", "Notes"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
+                    {[t("checklist.colRequirement"), t("checklist.colStatus"), t("checklist.colNotes")].map((h, i) => (
+                      <th key={i} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
                         {h}
                       </th>
                     ))}
@@ -167,7 +169,9 @@ export default function ChecklistPage() {
                     return (
                       <tr key={item.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]">
                         <td className="px-4 py-3 align-top">
-                          <p className="text-sm font-medium text-[#374151]">{item.requirement}</p>
+                          <p className="text-sm font-medium text-[#374151]">
+                            {t(`checklist.items.${item.id}`, { defaultValue: item.requirement })}
+                          </p>
                         </td>
                         <td className="px-4 py-3 align-top">
                           <select
@@ -180,7 +184,7 @@ export default function ChecklistPage() {
                           >
                             {(Object.keys(STATUS_CONFIG) as Status[]).map((s) => (
                               <option key={s} value={s}>
-                                {STATUS_CONFIG[s].label}
+                                {t(`checklist.status.${s}`)}
                               </option>
                             ))}
                           </select>
@@ -190,7 +194,7 @@ export default function ChecklistPage() {
                             type="text"
                             value={row.notes}
                             onChange={(e) => update(item.id, { notes: e.target.value })}
-                            placeholder="Add a quick note…"
+                            placeholder={t("checklist.notesPlaceholder")}
                             className="w-full text-xs bg-transparent border border-transparent hover:border-[#E5E7EB] focus:border-[#2F7D7E] focus:bg-white rounded px-2 py-1 transition-colors focus:outline-none"
                           />
                         </td>
@@ -202,9 +206,7 @@ export default function ChecklistPage() {
             </div>
           </Card>
 
-          <div className="text-[11px] text-[#9CA3AF] text-center">
-            Changes are saved automatically to your browser. Use "Reset to defaults" to start over.
-          </div>
+          <div className="text-[11px] text-[#9CA3AF] text-center">{t("checklist.footnote")}</div>
         </div>
       </div>
     </div>

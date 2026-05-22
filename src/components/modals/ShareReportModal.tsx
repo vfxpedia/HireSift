@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Share2, Copy, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "../primitives/Modal";
 import { PrimaryBtn, SecondaryBtn } from "../primitives/Buttons";
 import { inputClass } from "../primitives/Field";
@@ -16,13 +17,21 @@ interface Props {
   reviewer: string;
 }
 
-const ACCESS_LEVELS: { value: AccessLevel; label: string; desc: string }[] = [
-  { value: "view-only", label: "View only", desc: "Anyone with the link can read the report" },
-  { value: "internal", label: "Internal reviewer only", desc: "Requires HireSift sign-in" },
-  { value: "client", label: "Client viewer", desc: "Read-only branded view for the hiring client" },
-];
+const ACCESS_LEVEL_VALUES: AccessLevel[] = ["view-only", "internal", "client"];
+
+function accessLabelKey(a: AccessLevel): string {
+  if (a === "view-only") return "accessViewOnly";
+  if (a === "internal") return "accessInternal";
+  return "accessClient";
+}
+function accessDescKey(a: AccessLevel): string {
+  if (a === "view-only") return "accessViewOnlyDesc";
+  if (a === "internal") return "accessInternalDesc";
+  return "accessClientDesc";
+}
 
 export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) {
+  const { t } = useTranslation();
   const [access, setAccess] = useState<AccessLevel>("internal");
   const [expiration, setExpiration] = useState<string>(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
@@ -40,7 +49,7 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-      toast.success("Link copied");
+      toast.success(t("modals.shareReport.linkCopiedToast"));
     } catch {
       /* noop */
     }
@@ -55,22 +64,22 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
       type: "share",
     });
     setShared(true);
-    toast.success(`Share link created — expires ${expiration}`);
+    toast.success(t("modals.shareReport.sharedToast", { date: expiration }));
   };
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Share Report"
+      title={t("modals.shareReport.title")}
       description={`${candidate.name} · ${candidate.code}`}
       size="md"
       footer={
         <>
-          <SecondaryBtn onClick={onClose}>{shared ? "Close" : "Cancel"}</SecondaryBtn>
+          <SecondaryBtn onClick={onClose}>{shared ? t("common.close") : t("common.cancel")}</SecondaryBtn>
           {!shared && (
             <PrimaryBtn onClick={share} icon={<Share2 className="w-4 h-4" />}>
-              Share link
+              {t("modals.shareReport.shareLink")}
             </PrimaryBtn>
           )}
         </>
@@ -78,7 +87,7 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-[#374151] mb-1.5">Read-only link</label>
+          <label className="block text-xs font-medium text-[#374151] mb-1.5">{t("modals.shareReport.readonlyLink")}</label>
           <div className="flex gap-2">
             <input
               readOnly
@@ -92,32 +101,32 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
               className="px-3 py-2.5 text-xs font-medium bg-[#172033] text-white rounded-lg hover:bg-[#1e2d47] flex items-center gap-1.5 whitespace-nowrap"
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "Copied" : "Copy"}
+              {copied ? t("common.copied") : t("common.copy")}
             </button>
           </div>
         </div>
 
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-            Access level
+            {t("modals.shareReport.accessLevel")}
           </p>
           <div className="space-y-2">
-            {ACCESS_LEVELS.map((opt) => (
+            {ACCESS_LEVEL_VALUES.map((value) => (
               <label
-                key={opt.value}
+                key={value}
                 className="flex items-start gap-2.5 cursor-pointer border border-[#E5E7EB] rounded-lg px-3 py-2.5 hover:bg-[#F7F8FA]"
               >
                 <input
                   type="radio"
                   name="access"
-                  value={opt.value}
-                  checked={access === opt.value}
-                  onChange={() => setAccess(opt.value)}
+                  value={value}
+                  checked={access === value}
+                  onChange={() => setAccess(value)}
                   className="accent-[#2F7D7E] mt-0.5"
                 />
                 <div className="min-w-0">
-                  <p className="text-sm text-[#374151] font-medium">{opt.label}</p>
-                  <p className="text-[11px] text-[#6B7280]">{opt.desc}</p>
+                  <p className="text-sm text-[#374151] font-medium">{t(`modals.shareReport.${accessLabelKey(value)}`)}</p>
+                  <p className="text-[11px] text-[#6B7280]">{t(`modals.shareReport.${accessDescKey(value)}`)}</p>
                 </div>
               </label>
             ))}
@@ -126,7 +135,7 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-[#374151] mb-1.5">Expiration</label>
+            <label className="block text-xs font-medium text-[#374151] mb-1.5">{t("modals.shareReport.expiration")}</label>
             <input
               type="date"
               value={expiration}
@@ -141,7 +150,7 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
               onChange={(e) => setClientViewer(e.target.checked)}
               className="accent-[#2F7D7E] w-4 h-4"
             />
-            <span className="text-xs text-[#374151]">Enable client viewer</span>
+            <span className="text-xs text-[#374151]">{t("modals.shareReport.enableClient")}</span>
           </label>
         </div>
 
@@ -149,8 +158,8 @@ export function ShareReportModal({ open, onClose, candidate, reviewer }: Props) 
           <div className="flex items-start gap-2 px-3 py-2.5 bg-[#2F7D7E]/10 border border-[#2F7D7E]/30 rounded-lg">
             <Check className="w-3.5 h-3.5 text-[#2F7D7E] mt-0.5" />
             <div className="text-xs text-[#2F7D7E] leading-relaxed">
-              <p className="font-semibold">Share recorded</p>
-              <p>The share action is in the audit log. Recipients can open the link until expiration.</p>
+              <p className="font-semibold">{t("modals.shareReport.sharedTitle")}</p>
+              <p>{t("modals.shareReport.sharedBody")}</p>
             </div>
           </div>
         )}

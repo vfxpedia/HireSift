@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Download, Filter, Search, Lock, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
 import { SecondaryBtn } from "../components/primitives/Buttons";
@@ -8,14 +9,7 @@ import { cn } from "../lib/cn";
 import { listAudit } from "../api/audit";
 import type { AuditType } from "../types";
 
-const TYPE_OPTIONS: { value: AuditType; label: string }[] = [
-  { value: "report", label: "Report" },
-  { value: "review", label: "Review" },
-  { value: "submission", label: "Submission" },
-  { value: "request", label: "Request" },
-  { value: "consent", label: "Consent" },
-  { value: "share", label: "Share" },
-];
+const TYPE_VALUES: AuditType[] = ["report", "review", "submission", "request", "consent", "share"];
 
 const TYPE_COLOR: Record<string, string> = {
   report: "bg-[#172033]/10 text-[#172033]",
@@ -27,9 +21,11 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function AuditLogPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<Set<AuditType>>(new Set());
   const entries = listAudit();
+
   const filtered = useMemo(
     () =>
       entries.filter((e) => {
@@ -64,14 +60,66 @@ export default function AuditLogPage() {
     URL.revokeObjectURL(url);
   };
 
+  const filterPopover = (
+    <Popover
+      trigger={
+        <button
+          type="button"
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50",
+            typeFilter.size > 0
+              ? "border-[#2F7D7E] text-[#2F7D7E] bg-[#2F7D7E]/5"
+              : "border-[#E5E7EB] text-[#6B7280]",
+          )}
+        >
+          <Filter className="w-3.5 h-3.5" />
+          {t("common.filter")}
+          {typeFilter.size > 0 && (
+            <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2F7D7E] text-white text-[10px] font-semibold">
+              {typeFilter.size}
+            </span>
+          )}
+        </button>
+      }
+    >
+      <div className="space-y-3 min-w-48">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
+          {t("auditLogPage.filterBy")}
+        </p>
+        <div className="space-y-1.5">
+          {TYPE_VALUES.map((value) => (
+            <label key={value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+              <input
+                type="checkbox"
+                checked={typeFilter.has(value)}
+                onChange={() => toggleType(value)}
+                className="accent-[#2F7D7E] w-3.5 h-3.5"
+              />
+              {t(`auditLogPage.types.${value}`)}
+            </label>
+          ))}
+        </div>
+        {typeFilter.size > 0 && (
+          <button
+            type="button"
+            onClick={() => setTypeFilter(new Set())}
+            className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#374151]"
+          >
+            <X className="w-3 h-3" /> {t("common.clear")}
+          </button>
+        )}
+      </div>
+    </Popover>
+  );
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Audit Log"
-        subtitle="Complete record of all actions and events"
+        title={t("auditLogPage.title")}
+        subtitle={t("auditLogPage.subtitle")}
         actions={
           <SecondaryBtn onClick={exportLog} className="text-sm py-2" icon={<Download className="w-4 h-4" />}>
-            Export Log
+            {t("auditLogPage.exportLog")}
           </SecondaryBtn>
         }
       />
@@ -83,66 +131,24 @@ export default function AuditLogPage() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search audit log…"
+                placeholder={t("auditLogPage.searchPlaceholder")}
                 className="w-full pl-9 pr-4 py-2 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30"
               />
             </div>
-            <Popover
-              trigger={
-                <button
-                  type="button"
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50",
-                    typeFilter.size > 0
-                      ? "border-[#2F7D7E] text-[#2F7D7E] bg-[#2F7D7E]/5"
-                      : "border-[#E5E7EB] text-[#6B7280]",
-                  )}
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                  Filter
-                  {typeFilter.size > 0 && (
-                    <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2F7D7E] text-white text-[10px] font-semibold">
-                      {typeFilter.size}
-                    </span>
-                  )}
-                </button>
-              }
-            >
-              <div className="space-y-3 min-w-48">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
-                  Filter by type
-                </p>
-                <div className="space-y-1.5">
-                  {TYPE_OPTIONS.map((opt) => (
-                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
-                      <input
-                        type="checkbox"
-                        checked={typeFilter.has(opt.value)}
-                        onChange={() => toggleType(opt.value)}
-                        className="accent-[#2F7D7E] w-3.5 h-3.5"
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-                {typeFilter.size > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setTypeFilter(new Set())}
-                    className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#374151]"
-                  >
-                    <X className="w-3 h-3" /> Clear
-                  </button>
-                )}
-              </div>
-            </Popover>
+            {filterPopover}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                  {["Action", "Type", "User", "Candidate", "Timestamp"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
+                  {[
+                    t("auditLogPage.colAction"),
+                    t("auditLogPage.colType"),
+                    t("auditLogPage.colUser"),
+                    t("auditLogPage.colCandidate"),
+                    t("auditLogPage.colTimestamp"),
+                  ].map((h, i) => (
+                    <th key={i} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280]">
                       {h}
                     </th>
                   ))}
@@ -158,11 +164,11 @@ export default function AuditLogPage() {
                     <td className="px-4 py-3">
                       <span
                         className={cn(
-                          "text-xs font-medium px-2.5 py-1 rounded-md capitalize",
+                          "text-xs font-medium px-2.5 py-1 rounded-md",
                           TYPE_COLOR[entry.type] ?? "bg-gray-100 text-gray-600",
                         )}
                       >
-                        {entry.type}
+                        {t(`auditLogPage.types.${entry.type}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-[#374151]">{entry.user}</td>
@@ -173,7 +179,7 @@ export default function AuditLogPage() {
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center text-sm text-[#9CA3AF]">
-                      No audit entries match your search.
+                      {t("auditLogPage.noMatch")}
                     </td>
                   </tr>
                 )}
@@ -186,9 +192,8 @@ export default function AuditLogPage() {
           <div className="flex items-start gap-3">
             <Lock className="w-4 h-4 text-[#6B7280] mt-0.5 shrink-0" />
             <p className="text-xs text-[#6B7280] leading-relaxed">
-              <strong className="text-[#374151]">Audit log integrity:</strong> All log entries are
-              immutable and timestamped. Logs are retained for 2 years per the default data retention
-              policy and may be exported for compliance review.
+              <strong className="text-[#374151]">{t("auditLogPage.integrityTitle")}</strong>{" "}
+              {t("auditLogPage.integrityBody")}
             </p>
           </div>
         </div>

@@ -22,7 +22,7 @@ import { Card, SectionLabel } from "../components/primitives/Card";
 import { AttentionBadge } from "../components/primitives/Badges";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
 import { InfoModal } from "../components/modals/InfoModal";
-import { POLICIES } from "../lib/policies";
+import { POLICY_KEYS, POLICY_PARAGRAPH_KEYS, type PolicyKey } from "../lib/policies";
 import { LanguageToggle } from "../components/primitives/LanguageToggle";
 import { useTranslation } from "react-i18next";
 
@@ -85,8 +85,7 @@ const SCOPE = {
 export default function LandingPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [policy, setPolicy] = useState<keyof typeof POLICIES | null>(null);
-  const policyDoc = policy ? POLICIES[policy] : null;
+  const [policy, setPolicy] = useState<PolicyKey | null>(null);
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }} className="bg-white">
@@ -425,7 +424,7 @@ export default function LandingPage() {
                     onClick={() => setPolicy(k)}
                     className="hover:text-white transition-colors text-left"
                   >
-                    {POLICIES[k].title}
+                    {t(`policies.${k}.title`)}
                   </button>
                 ))}
               </div>
@@ -440,7 +439,7 @@ export default function LandingPage() {
                     onClick={() => setPolicy(k)}
                     className="hover:text-white transition-colors text-left"
                   >
-                    {POLICIES[k].title}
+                    {t(`policies.${k}.title`)}
                   </button>
                 ))}
               </div>
@@ -454,14 +453,16 @@ export default function LandingPage() {
       <InfoModal
         open={!!policy}
         onClose={() => setPolicy(null)}
-        title={policyDoc?.title ?? ""}
+        title={policy ? t(`policies.${policy}.title`) : ""}
         body={
           <>
-            {policyDoc?.paragraphs.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+            {policy &&
+              POLICY_PARAGRAPH_KEYS[policy].map((pk) => (
+                <p key={pk}>{t(`policies.${policy}.${pk}`)}</p>
+              ))}
           </>
         }
+        closeLabel={t("common.close")}
       />
     </div>
   );

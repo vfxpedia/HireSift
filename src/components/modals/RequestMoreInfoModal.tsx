@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "../primitives/Modal";
 import { PrimaryBtn, SecondaryBtn } from "../primitives/Buttons";
 import { inputClass } from "../primitives/Field";
@@ -14,20 +15,16 @@ interface Props {
   reviewer?: string;
 }
 
-const PRESETS = [
-  "Could you walk us through one of your recent GitHub commits?",
-  "Please share an additional document that confirms your professional certification.",
-  "Could you re-record the selfie video in better lighting?",
-  "Please confirm the dates of employment listed on your portfolio.",
-];
-
 export function RequestMoreInfoModal({ open, onClose, candidate, reviewer }: Props) {
+  const { t } = useTranslation();
   const [message, setMessage] = useState("");
+
+  const presets = t("modals.requestMoreInfo.presets", { returnObjects: true }) as string[];
 
   const send = () => {
     const text = message.trim();
     if (!text) {
-      toast.error("Please add a message before sending.");
+      toast.error(t("modals.requestMoreInfo.missingMessage"));
       return;
     }
     addAudit({
@@ -36,7 +33,7 @@ export function RequestMoreInfoModal({ open, onClose, candidate, reviewer }: Pro
       candidate: candidate.code,
       type: "review",
     });
-    toast.success(`Request sent to ${candidate.email}`);
+    toast.success(t("modals.requestMoreInfo.sentToast", { email: candidate.email }));
     setMessage("");
     onClose();
   };
@@ -45,14 +42,14 @@ export function RequestMoreInfoModal({ open, onClose, candidate, reviewer }: Pro
     <Modal
       open={open}
       onClose={onClose}
-      title="Request More Information"
-      description={`Send ${candidate.name} a short message asking for additional verification material.`}
+      title={t("modals.requestMoreInfo.title")}
+      description={t("modals.requestMoreInfo.description", { name: candidate.name })}
       size="md"
       footer={
         <>
-          <SecondaryBtn onClick={onClose}>Cancel</SecondaryBtn>
+          <SecondaryBtn onClick={onClose}>{t("common.cancel")}</SecondaryBtn>
           <PrimaryBtn onClick={send} icon={<Mail className="w-4 h-4" />}>
-            Send request
+            {t("modals.requestMoreInfo.send")}
           </PrimaryBtn>
         </>
       }
@@ -62,24 +59,25 @@ export function RequestMoreInfoModal({ open, onClose, candidate, reviewer }: Pro
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
-          placeholder="Describe what you would like the candidate to provide…"
+          placeholder={t("modals.requestMoreInfo.placeholder")}
           className={inputClass + " resize-none"}
         />
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-            Or pick a preset
+            {t("modals.requestMoreInfo.preset")}
           </p>
           <div className="space-y-1">
-            {PRESETS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setMessage(p)}
-                className="w-full text-left text-xs text-[#374151] px-3 py-2 rounded-lg hover:bg-[#F7F8FA] border border-[#E5E7EB]"
-              >
-                {p}
-              </button>
-            ))}
+            {Array.isArray(presets) &&
+              presets.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setMessage(p)}
+                  className="w-full text-left text-xs text-[#374151] px-3 py-2 rounded-lg hover:bg-[#F7F8FA] border border-[#E5E7EB]"
+                >
+                  {p}
+                </button>
+              ))}
           </div>
         </div>
       </div>

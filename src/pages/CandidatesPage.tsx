@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Search,
@@ -21,23 +22,12 @@ import { listCandidates } from "../api/candidates";
 import type { Candidate, AttentionLevel, SubmissionStatus } from "../types";
 import { cn } from "../lib/cn";
 
-const STATUS_OPTIONS: { value: SubmissionStatus; label: string }[] = [
-  { value: "pending", label: "Pending" },
-  { value: "in-progress", label: "In Progress" },
-  { value: "submitted", label: "Submitted" },
-  { value: "reviewed", label: "Reviewed" },
-  { value: "report-ready", label: "Report Ready" },
-];
-
-const ATTENTION_OPTIONS: { value: AttentionLevel; label: string }[] = [
-  { value: "low", label: "Low Attention" },
-  { value: "medium", label: "Review Recommended" },
-  { value: "high", label: "High Attention" },
-  { value: "manual", label: "Manual Review" },
-];
+const STATUS_VALUES: SubmissionStatus[] = ["pending", "in-progress", "submitted", "reviewed", "report-ready"];
+const ATTENTION_VALUES: AttentionLevel[] = ["low", "medium", "high", "manual"];
 
 export default function CandidatesPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [tick, setTick] = useState(0);
@@ -89,15 +79,15 @@ export default function CandidatesPage() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
-        title="Candidates"
-        subtitle={`${candidates.length} verification requests`}
+        title={t("candidates.title")}
+        subtitle={t("candidates.subtitle", { count: candidates.length })}
         actions={
           <PrimaryBtn
             onClick={() => setShowModal(true)}
             icon={<Plus className="w-4 h-4" />}
             className="text-sm py-2"
           >
-            New Verification
+            {t("candidates.newVerification")}
           </PrimaryBtn>
         }
       />
@@ -109,7 +99,7 @@ export default function CandidatesPage() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search candidates…"
+                placeholder={t("candidates.searchPlaceholder")}
                 className="w-full pl-9 pr-4 py-2 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F7D7E]/30 focus:border-[#2F7D7E]"
               />
             </div>
@@ -125,7 +115,7 @@ export default function CandidatesPage() {
                   )}
                 >
                   <Filter className="w-3.5 h-3.5" />
-                  Filter
+                  {t("common.filter")}
                   {activeFilterCount > 0 && (
                     <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2F7D7E] text-white text-[10px] font-semibold">
                       {activeFilterCount}
@@ -137,36 +127,36 @@ export default function CandidatesPage() {
               <div className="space-y-4 min-w-60">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-                    Submission status
+                    {t("candidates.filterStatus")}
                   </p>
                   <div className="space-y-1.5">
-                    {STATUS_OPTIONS.map((opt) => (
-                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+                    {STATUS_VALUES.map((value) => (
+                      <label key={value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
                         <input
                           type="checkbox"
-                          checked={statusFilter.has(opt.value)}
-                          onChange={() => toggleStatus(opt.value)}
+                          checked={statusFilter.has(value)}
+                          onChange={() => toggleStatus(value)}
                           className="accent-[#2F7D7E] w-3.5 h-3.5"
                         />
-                        {opt.label}
+                        {t(`status.${value}`)}
                       </label>
                     ))}
                   </div>
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
-                    Attention level
+                    {t("candidates.filterAttention")}
                   </p>
                   <div className="space-y-1.5">
-                    {ATTENTION_OPTIONS.map((opt) => (
-                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
+                    {ATTENTION_VALUES.map((value) => (
+                      <label key={value} className="flex items-center gap-2 cursor-pointer text-xs text-[#374151]">
                         <input
                           type="checkbox"
-                          checked={attentionFilter.has(opt.value)}
-                          onChange={() => toggleAttention(opt.value)}
+                          checked={attentionFilter.has(value)}
+                          onChange={() => toggleAttention(value)}
                           className="accent-[#2F7D7E] w-3.5 h-3.5"
                         />
-                        {opt.label}
+                        {t(`attention.${value}`)}
                       </label>
                     ))}
                   </div>
@@ -177,7 +167,7 @@ export default function CandidatesPage() {
                     onClick={clearFilters}
                     className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#374151]"
                   >
-                    <X className="w-3 h-3" /> Clear all
+                    <X className="w-3 h-3" /> {t("common.clearAll")}
                   </button>
                 )}
               </div>
@@ -188,19 +178,19 @@ export default function CandidatesPage() {
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
                   {[
-                    "Candidate",
-                    "Role",
-                    "Submission",
-                    "Identity",
-                    "Portfolio",
-                    "Session",
-                    "Attention",
-                    "Report",
-                    "Updated",
+                    t("candidates.colCandidate"),
+                    t("candidates.colRole"),
+                    t("candidates.colSubmission"),
+                    t("candidates.colIdentity"),
+                    t("candidates.colPortfolio"),
+                    t("candidates.colSession"),
+                    t("candidates.colAttention"),
+                    t("candidates.colReport"),
+                    t("candidates.colUpdated"),
                     "",
-                  ].map((h) => (
+                  ].map((h, i) => (
                     <th
-                      key={h}
+                      key={i}
                       className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] whitespace-nowrap"
                     >
                       {h}
@@ -228,7 +218,7 @@ export default function CandidatesPage() {
                         {c.submissionStatus === "pending" && c.linkSent && (
                           <span className="text-[10px] text-[#2F7D7E] flex items-center gap-1">
                             <Check className="w-2.5 h-2.5" />
-                            Link Sent
+                            {t("candidates.linkSent")}
                           </span>
                         )}
                       </div>
@@ -237,7 +227,7 @@ export default function CandidatesPage() {
                       {c.submissionStatus !== "pending" ? (
                         <span className="text-xs text-[#2F7D7E] flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" />
-                          Submitted
+                          {t("candidates.submittedShort")}
                         </span>
                       ) : (
                         <span className="text-xs text-[#9CA3AF]">—</span>
@@ -247,7 +237,7 @@ export default function CandidatesPage() {
                       {c.submissionStatus !== "pending" ? (
                         <span className="text-xs text-[#2F7D7E] flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" />
-                          Submitted
+                          {t("candidates.submittedShort")}
                         </span>
                       ) : (
                         <span className="text-xs text-[#9CA3AF]">—</span>
@@ -275,10 +265,10 @@ export default function CandidatesPage() {
                           }}
                           className="text-xs text-[#2F7D7E] hover:underline flex items-center gap-1 whitespace-nowrap"
                         >
-                          <Eye className="w-3 h-3" /> View Report
+                          <Eye className="w-3 h-3" /> {t("candidates.viewReport")}
                         </button>
                       ) : (
-                        <span className="text-xs text-[#9CA3AF]">Not ready</span>
+                        <span className="text-xs text-[#9CA3AF]">{t("candidates.notReady")}</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-xs text-[#6B7280] whitespace-nowrap">
@@ -288,7 +278,7 @@ export default function CandidatesPage() {
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => copyLink(c)}
-                          title="Copy verification link"
+                          title={t("candidates.copyLink")}
                           className="p-1.5 text-[#9CA3AF] hover:text-[#2F7D7E] rounded hover:bg-gray-50"
                         >
                           {copiedId === c.id ? (
@@ -310,7 +300,7 @@ export default function CandidatesPage() {
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={10} className="px-4 py-12 text-center text-sm text-[#9CA3AF]">
-                      No candidates match your search.
+                      {t("candidates.noMatch")}
                     </td>
                   </tr>
                 )}

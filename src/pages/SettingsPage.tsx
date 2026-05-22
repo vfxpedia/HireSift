@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/layout/TopBar";
 import { Card } from "../components/primitives/Card";
 import { PrimaryBtn, SecondaryBtn } from "../components/primitives/Buttons";
@@ -14,6 +15,7 @@ import type { OrgSettings } from "../types";
 const RETENTION_OPTIONS = ["30 days", "60 days", "90 days", "180 days", "1 year", "2 years"];
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"org" | "retention" | "consent">("org");
   const [org, setOrg] = useState<OrgSettings>(db.getOrg());
   const [savedTick, setSavedTick] = useState(false);
@@ -27,7 +29,7 @@ export default function SettingsPage() {
     db.setOrg(org);
     setSavedTick(true);
     setTimeout(() => setSavedTick(false), 1500);
-    toast.success("Settings saved.");
+    toast.success(t("settings.savedToast"));
   };
 
   const saveTemplate = (next: string) => {
@@ -39,18 +41,18 @@ export default function SettingsPage() {
     };
     setOrg(updated);
     db.setOrg(updated);
-    toast.success("Consent template updated.");
+    toast.success(t("settings.templateSavedToast"));
   };
 
   const tabs = [
-    { id: "org", label: "Organization" },
-    { id: "retention", label: "Data Retention" },
-    { id: "consent", label: "Consent Templates" },
+    { id: "org", label: t("settings.tabs.org") },
+    { id: "retention", label: t("settings.tabs.retention") },
+    { id: "consent", label: t("settings.tabs.consent") },
   ] as const;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <TopBar title="Settings" subtitle="Organization and compliance settings" />
+      <TopBar title={t("settings.title")} subtitle={t("settings.subtitle")} />
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto">
           <div className="flex gap-1 bg-[#F3F4F6] p-1 rounded-xl mb-6 w-fit">
@@ -73,23 +75,23 @@ export default function SettingsPage() {
           {activeTab === "org" && (
             <div className="space-y-5">
               <Card className="p-5">
-                <h3 className="font-semibold text-sm text-[#111827] mb-4">Organization Information</h3>
+                <h3 className="font-semibold text-sm text-[#111827] mb-4">{t("settings.orgInfo")}</h3>
                 <div className="space-y-4">
-                  <Field label="Organization name">
+                  <Field label={t("settings.orgName")}>
                     <input
                       value={org.name}
                       onChange={(e) => updateOrg({ name: e.target.value })}
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Primary contact email">
+                  <Field label={t("settings.contactEmail")}>
                     <input
                       value={org.contactEmail}
                       onChange={(e) => updateOrg({ contactEmail: e.target.value })}
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Time zone">
+                  <Field label={t("settings.timeZone")}>
                     <input
                       value={org.timeZone}
                       onChange={(e) => updateOrg({ timeZone: e.target.value })}
@@ -99,12 +101,12 @@ export default function SettingsPage() {
                 </div>
                 <div className="mt-4 pt-4 border-t border-[#E5E7EB] flex justify-end">
                   <PrimaryBtn onClick={save} className="text-sm py-2">
-                    {savedTick ? "Saved" : "Save changes"}
+                    {savedTick ? t("common.saved") : t("settings.saveChanges")}
                   </PrimaryBtn>
                 </div>
               </Card>
               <Card className="p-5">
-                <h3 className="font-semibold text-sm text-[#111827] mb-3">Team Members</h3>
+                <h3 className="font-semibold text-sm text-[#111827] mb-3">{t("settings.teamMembers")}</h3>
                 <div className="space-y-3">
                   {[
                     { name: "Sarah Chen", email: "sarah@techcorp.com", role: "Admin" },
@@ -135,17 +137,15 @@ export default function SettingsPage() {
 
           {activeTab === "retention" && (
             <Card className="p-5">
-              <h3 className="font-semibold text-sm text-[#111827] mb-2">Data Retention Policy</h3>
-              <p className="text-xs text-[#6B7280] mb-5">
-                Control how long submitted candidate data is retained.
-              </p>
+              <h3 className="font-semibold text-sm text-[#111827] mb-2">{t("settings.retentionTitle")}</h3>
+              <p className="text-xs text-[#6B7280] mb-5">{t("settings.retentionIntro")}</p>
               <div className="space-y-4">
                 {(
                   [
-                    { key: "submission", label: "Candidate submission data" },
-                    { key: "media", label: "Media samples (video/voice)" },
-                    { key: "reports", label: "Trust reports" },
-                    { key: "auditLogs", label: "Audit logs" },
+                    { key: "submission", label: t("settings.retention.submission") },
+                    { key: "media", label: t("settings.retention.media") },
+                    { key: "reports", label: t("settings.retention.reports") },
+                    { key: "auditLogs", label: t("settings.retention.auditLogs") },
                   ] as const
                 ).map((f) => (
                   <div
@@ -170,13 +170,12 @@ export default function SettingsPage() {
               <div className="mt-4 p-3 bg-[#F7F8FA] rounded-xl">
                 <p className="text-xs text-[#6B7280]">
                   <Info className="w-3 h-3 inline mr-1" />
-                  Candidates may request early deletion at any time by contacting
-                  privacy@hiresift.com. Retention settings apply to organizational defaults only.
+                  {t("settings.retentionFootnote")}
                 </p>
               </div>
               <div className="mt-4 flex justify-end">
                 <PrimaryBtn onClick={save} className="text-sm py-2">
-                  {savedTick ? "Saved" : "Save retention policy"}
+                  {savedTick ? t("common.saved") : t("settings.saveRetention")}
                 </PrimaryBtn>
               </div>
             </Card>
@@ -185,18 +184,19 @@ export default function SettingsPage() {
           {activeTab === "consent" && (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-sm text-[#111827]">Consent Template</h3>
+                <h3 className="font-semibold text-sm text-[#111827]">{t("settings.consentTitle")}</h3>
                 <SecondaryBtn className="text-xs py-1.5" onClick={() => setShowTemplateEditor(true)}>
-                  Edit template
+                  {t("settings.editTemplate")}
                 </SecondaryBtn>
               </div>
               <pre className="bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl p-4 text-sm text-[#374151] leading-relaxed whitespace-pre-wrap font-sans">
                 {org.consentTemplate}
               </pre>
               <div className="mt-3 text-xs text-[#9CA3AF]">
-                Last updated:{" "}
-                {org.consentTemplateUpdatedAt ? formatDate(org.consentTemplateUpdatedAt) : "—"} · Version{" "}
-                {org.consentTemplateVersion ?? "1.0"}
+                {t("settings.updatedAt", {
+                  date: org.consentTemplateUpdatedAt ? formatDate(org.consentTemplateUpdatedAt) : "—",
+                  version: org.consentTemplateVersion ?? "1.0",
+                })}
               </div>
             </Card>
           )}
