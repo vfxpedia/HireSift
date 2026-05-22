@@ -26,6 +26,7 @@ import { addAudit } from "../api/audit";
 import { toast } from "../components/primitives/Toaster";
 import { useLiveSignals } from "../hooks/useLiveSignals";
 import { useMediaRecorder } from "../hooks/useMediaRecorder";
+import { useFaceTracking } from "../hooks/useFaceTracking";
 import { cn } from "../lib/cn";
 
 const DEMO_VIDEO = "/demo/interview.mp4";
@@ -56,7 +57,10 @@ export default function LiveInterviewPage() {
   const review = candidate ? getReview(candidate.id) : undefined;
 
   const [source, setSource] = useState<LiveSource>("demo");
-  const [micOn, setMicOn] = useState(true);
+  // `audioOn` controls the <video> element's `muted` attribute. We always
+  // boot muted so autoplay is allowed, then the user clicks the mic button
+  // to opt-in to sound (browser policy compliant gesture).
+  const [audioOn, setAudioOn] = useState(false);
   const [camOn, setCamOn] = useState(true);
   const [tick, setTick] = useState(0); // 1Hz clock for elapsed timer
   const [videoTime, setVideoTime] = useState(0);
@@ -66,17 +70,29 @@ export default function LiveInterviewPage() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Real face tracking via face-api.js (lazy-loaded). Falls back to the
+  // static mesh when the model is still loading or no face is detected.
+  const { landmarks, confidence, ready: faceReady } = useFaceTracking({
+    videoRef,
+    active: !!candidate,
+    intervalMs: 120,
+  });
+
   // Live camera plumbing — only opens stream when source === "live"
   const { previewStream, permissionError, start, stop } = useMediaRecorder({
     kind: "video",
     maxDurationSec: 60 * 30, // never auto-stop in this context; we drive manually
   });
 
-  // Reset session timer when (re)entering or switching candidate
+  // Reset session timer (and force-mute) when (re)entering or switching
+  // candidate / source. The user has to click the mic button again on the
+  // new source to unmute — keeps autoplay policy happy and prevents
+  // surprise audio.
   useEffect(() => {
     sessionStartRef.current = Date.now();
     auditedStartRef.current = false;
     setVideoTime(0);
+    setAudioOn(false);
   }, [targetId, source]);
 
   // 1Hz timer
@@ -108,24 +124,32 @@ export default function LiveInterviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
-  // Wire the stream into the <video> element for live mode
+  // Wire the stream into the <video> element + apply mute state.
+  // In live mode we always keep the local preview muted (otherwise the
+  // presenter's own mic would feed back through the page); in demo mode
+  // `audioOn` drives mute so the user can hear the deepfake clip after
+  // their gesture.
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
     if (source === "live") {
       if (previewStream) {
         el.srcObject = previewStream;
-        el.muted = true;
+        el.muted = true; // always muted in self-view to avoid echo
         el.play().catch(() => {});
       }
     } else {
       el.srcObject = null;
-      el.src = DEMO_VIDEO;
-      el.muted = !micOn ? true : true; // demo always silent for kiosk-friendly playback
-      el.load();
+      if (el.src !== window.location.origin + DEMO_VIDEO && !el.src.endsWith(DEMO_VIDEO)) {
+        el.src = DEMO_VIDEO;
+        el.load();
+      }
+      el.muted = !audioOn;
+      // Re-attempt play after mute change so a user-gesture unmute resumes
+      // playback if the browser had paused it.
       el.play().catch(() => {});
     }
-  }, [source, previewStream, micOn]);
+  }, [source, previewStream, audioOn]);
 
   // Track demo video currentTime so signals can react to scripted moments
   useEffect(() => {
@@ -233,6 +257,7 @@ export default function LiveInterviewPage() {
                 <FaceMeshOverlay
                   active={!!candidate}
                   intensity={signals.faceConsistency.status === "low" ? 0.4 : 0.8}
+                  landmarks={landmarks}
                 />
 
                 {/* Status pill — top-left */}
@@ -244,6 +269,16 @@ export default function LiveInterviewPage() {
                   <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white text-[11px] font-mono">
                     {formatTimer(elapsedMs)}
                   </div>
+                  {landmarks && (
+                    <div className="px-2.5 py-1 rounded-md bg-[#2F7D7E]/80 backdrop-blur text-white text-[10px] font-medium">
+                      Face tracking · {Math.round(confidence * 100)}%
+                    </div>
+                  )}
+                  {!faceReady && !landmarks && (
+                    <div className="px-2.5 py-1 rounded-md bg-black/55 backdrop-blur text-white/70 text-[10px] font-medium">
+                      Loading face model…
+                    </div>
+                  )}
                 </div>
 
                 {/* Attention badge — top-right */}
@@ -268,12 +303,18 @@ export default function LiveInterviewPage() {
               <div className="px-4 py-3 border-t border-[#E5E7EB] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ControlButton
-                    active={micOn}
-                    onClick={() => setMicOn((v) => !v)}
-                    disabled={source !== "live"}
-                    title={micOn ? "Mute microphone" : "Unmute microphone"}
+                    active={audioOn}
+                    onClick={() => setAudioOn((v) => !v)}
+                    title={
+                      source === "live"
+                        ? "Self-view is muted to avoid echo"
+                        : audioOn
+                        ? "Mute video sound"
+                        : "Unmute video sound"
+                    }
+                    disabled={source === "live"}
                   >
-                    {micOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                    {audioOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
                   </ControlButton>
                   <ControlButton
                     active={camOn}
@@ -292,7 +333,9 @@ export default function LiveInterviewPage() {
                 </div>
                 <div className="text-[11px] text-[#9CA3AF]">
                   {source === "demo"
-                    ? "Demo playback loops for presentation purposes."
+                    ? audioOn
+                      ? "Demo playback with audio — click the mic again to mute."
+                      : "Demo playback is muted by default. Click the mic to hear the clip."
                     : "Live camera mode — your device feed is used only for this session."}
                 </div>
               </div>
